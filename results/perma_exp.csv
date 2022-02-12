@@ -1,0 +1,6 @@
+treatments,df,SS,MS,pseudo.F,R2,p.value
+salinity region,1,0.97,0.97,8.2,0.09,0.375
+treatment,1,0.4,0.4,3.41,0.04,0.005
+salinity region x treatment,1,0.18,0.18,1.52,0.02,0.025
+residuals,80,9.43,0.12,NA,0.86,NA
+total,83,10.97,NA,NA,1,NA

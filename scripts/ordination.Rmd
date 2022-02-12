@@ -1,0 +1,669 @@
+---
+title: "Salinity variation, plant-herbivore interactions and community structure on rocky shores - Ordination Plots and Models"
+author: "Theraesa Coyle, Rebecca Kordas, Sandra Emry & Chris Harley"
+date: "15/09/2021"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r set chunk options}
+knitr::opts_chunk$set(message = FALSE, warning = FALSE, echo = TRUE)
+```
+
+```{r setup, include = FALSE, warning = FALSE, message=FALSE, include=FALSE}
+
+library(tidyverse)
+library(skimr)
+library(ggbiplot)
+library(vegan)
+library(here)
+library(permute)
+
+theme_set(theme_classic())
+```
+
+### Survey Data 
+#### Preparing the dataset
+
+```{r prep survey dataset, results = "hide", echo = TRUE, warnings = FALSE}
+# read in dataset for field transects
+transect <- read_csv(here::here("data", "tidy", "field_transect_tidy.csv"))
+
+#creating a unique name for each transect to be used as row names 
+transect <- transect %>% 
+  unite(col = "site_rep_month", c("site", "quadrat_no", "month"), sep = "_", remove = FALSE) %>% 
+  mutate(site = factor(site, levels = c("Eagle Cove", "Hailstorm 2", "Ruckle", "Horseshoe Bay", "Lions Bay 2", "Rope Site 2")),
+         month = factor(month, levels = c("May", "June", "July", "September")),
+         salinity_regime = factor(salinity_regime, levels = c("L", "H")))
+  
+# parse out only the species data, and getting rid of redundant variables  
+survey_comm_data <- transect %>% 
+  select(balanus_pt:hermit_crab_no) %>% 
+  select(-c("barnacles_total_pt", "greens_pyropia_pt", "reds_pt", "reds_fucus_pt", "all_limpets_no", "littorina_total_no", "gastropods_no", "greens_pt"))
+
+survey_env_data <- transect %>%
+  select(month, site, salinity_regime) %>% 
+  mutate(salinity_regime = factor(salinity_regime),
+         month = factor(month))  
+```
+
+
+#### NMDS on survey data  
+
+NMDS attempts to represent the pairwise dissimilarity between samples in a low dimensional space. It is a rank based approach, meaning the original distance data is substituted with ranks. Information about the magnitude of distances is lost, but it rectifies the 'horseshoe effect' that occurs with PCoA, due to an assumption of linear relationships among species abundances.  
+
+NMDS is an iterative algorithm, beginning with random placement of data objects in ordination space. The algorithm then begins to refine this placement by an iterative process, attempting to find an ordination in which ordinated object distances closely match the order of object dissimilarities in the original distance matrix. The stress value reflects how well the ordination summarizes the observed distances among the samples.
+
+To begin, NMDS requires a distance matrix, or a matrix of dissimilarities. Raw Euclidean distances are not ideal for this purpose: they’re sensitive to total abundances, so may treat sites with a similar number of species as more similar, even though the identities of the species are different. They’re also sensitive to species absences, so may treat sites with the same number of absent species as more similar.
+
+Consequently, ecologists use the Bray-Curtis dissimilarity calculation, which has a number of ideal properties:
+
+It is invariant to changes in units.
+It is unaffected by additions/removals of species that are not present in two communities,
+It is unaffected by the addition of a new community,
+It can recognize differences in total abundances when relative abundances are the same
+
+
+Finding the number of axes that keep the stress of the ordination low:
+```{r survey stress vs. dimensions, echo=TRUE, results = "hide"}
+
+# Fit NMDS solutions for a number of k
+k_vec <- 1:10
+stress <- numeric(length(k_vec))
+survey_dij <- metaMDSdist(survey_comm_data, autotransform = TRUE, trace = FALSE, distance = "bray")
+set.seed(25)
+
+for(i in seq_along(k_vec)) {
+    sol <- metaMDSiter(survey_dij, k = i,
+                       trace = FALSE)
+    stress[i] <- sol$stress
+}
+
+plot(k_vec, stress, type = "b", ylab = "Stress",
+     xlab = "Dimensions")
+
+```
+
+
+It looks like there isn't much improvement in the ordination past 3 dimensions so I'm continuing with that for now. I'm going to rerun the NMDS now with 3 dimensions.
+
+Currently, I'm using the double Wisconsin transformation inside the metaMDS wrapper. This standardizes species to equal maxima, then sites to equal totals; this puts equalize emphasis among sample units and among species.
+
+
+```{r survey NMDS with 3 dims Wisconsin transformation}
+
+set.seed(31)
+nmds_survey <- metaMDS(survey_comm_data, k = 3, trymax = 100, trace = TRUE, autotransform = TRUE, distance = "bray")
+
+nmds_survey
+
+```
+
+**Stress and goodness of fit plots:** 
+Large circles around sites indicate that the model is not fitting those sites very well.  
+```{r survey stressplot, fig.width= 8, fig.height=6}
+gof <- goodness(nmds_survey)
+
+stressplot(nmds_survey)
+plot(nmds_survey, type="t", main = "goodness of fit")
+points(nmds_survey, display="sites", cex=gof*100)
+```
+
+#### Plotting the results
+
+Obtain the coordinates for your NMDS1 and NMDS2 axes and put them in a new data frame: I’ve called this new data frame, "data.scores.hell", or "data.scores.wisc". Then, add columns with the information that we want to show on the plot - site, month, salinity regime. I'm currently not showing any species information on the plot. Do we want to?
+
+The function 'envfit' is fitting a salinity vector onto the ordination with linear regression. Do we want to include this vector? If yes, I need to figure out how to put an arrow head on to it. (Currently not on the plot below)
+
+```{r prepping ggplot survey figure}
+# salinity <- transect %>% 
+#   select(salinity_ppt)
+
+# regions <- rep(c(rep("high_salinity", 24), rep("low_salinity", 24)), 4)
+
+# ef <- envfit(nmds_survey, salinity, permu = 999)
+# ef_coord_cont <-  as.data.frame(scores(ef, "vectors"))
+
+#extract NMDS scores (x and y coordinates)
+data.scores <- as.data.frame(scores(nmds_survey))
+
+#add columns to data frame 
+data.scores$Site <- transect$site
+data.scores$Month <- transect$month
+data.scores$Salinity <- transect$salinity_regime
+```
+
+Plot with ellipses drawn for salinity regime and month:
+```{R NMDS survey plot with salnity and month ellipses, echo = TRUE, fig.width= 8, fig.height = 6}
+survey_nmds <- ggplot(data = data.scores, aes(x = NMDS1, y = NMDS2)) + 
+  geom_point(aes(colour = Salinity), size = 3) + 
+   scale_colour_manual(values = c("orange", "steelblue"))  + 
+  stat_ellipse(aes(colour = Salinity, linetype = Month)) + 
+ theme(axis.title = element_text(size = 10, face = "bold", colour = "grey30"), 
+       panel.background = element_blank(), panel.border = element_rect(fill = NA, colour = "grey30"), 
+       axis.ticks = element_blank(), axis.text = element_blank(), legend.key = element_blank(), 
+       legend.title = element_text(size = 10, face = "bold", colour = "grey30"), 
+       legend.text = element_text(size = 9, colour = "grey30")) + 
+     labs(colour = "Treatment")
+
+survey_nmds
+ 
+ggsave(filename = "survey_nmds.png", plot = survey_nmds, path = here::here("figures"), width = 16, height = 10, units = "cm")
+```
+
+Plot with ellipses drawn for salinity regime and site:
+```{R NMDS survey plot with salnity and site ellipses, echo = TRUE, fig.width= 8, fig.height = 6}
+## Plotting with ellipses for site instead and leaving month info out 
+ggplot(data = data.scores, aes(x = NMDS1, y = NMDS2)) + 
+  geom_point(aes(colour = Salinity), size = 4) + 
+   scale_colour_manual(values = c("orange", "steelblue"))  + 
+  stat_ellipse(aes(colour = Salinity, linetype = Site)) 
+
+```
+
+### Permanova on survey data
+
+Permutational multivariate analysis of variance (PERMANOVA) is a non-parametric multivariate statistical test. It is used to compare groups of objects and test the null hypothesis that the centroids and dispersion of the groups as defined by measure space are equivalent for all groups. A rejection of the null hypothesis means that either the centroid and/or the spread of the objects is different between the groups. Hence the test is based on the prior calculation of the distance between any two objects included in your experiment.
+
+PERMANOVA assumes no distribution, allows for differences in between-group variation, is insensitive to multicollinearity, allows for multiple variables and is insensitive to many zeros.
+
+**Assumptions:**
+
+Objects in the data set are exchangeable under the null hypothesis
+Exchangeable objects (sites, samples, observations, etc) are independent
+Exchangeable objects have similar multivariate disperson (i.e. each group has a similar degree of multivariate scatter)
+
+*Notes*
+I am restricting the permutations so that it keeps a transect's 8 quadrats together, because we know these are not independent from one another. I am not incorporating temporal autocorrelation in to the permutation scheme because we are including that as a fixed effect. (But no matter how we permute the data, the two fixed effects and their interaction are always significant)
+
+```{r survey permanova}
+
+perm <- how(within = Within(type = "free", mirror = TRUE), 
+     plots = Plots(strata = transect$site, mirror = TRUE, type = "free"), 
+     blocks = NULL) # maintaining the dependence of quadrats along a transect
+
+survey_perma <- adonis(survey_comm_data ~ salinity_regime * month, data = transect, permutations = perm, method = "bray") # take site out of adonis call 
+
+survey_perma
+
+df <- data.frame(treatments = c("salinity region", "month", "salinity region x month", "residuals", "total"), df = survey_perma$aov.tab$Df, SS = survey_perma$aov.tab$SumsOfSqs, MS = survey_perma$aov.tab$MeanSqs, `pseudo F` = survey_perma$aov.tab$F.Model, R2 = survey_perma$aov.tab$R2, `p value` = survey_perma$aov.tab$`Pr(>F)`)
+
+df[ , 3:6] <- round(df[, 3:6], 2)
+
+write_csv(df, "/Users/sandraemry/Documents/coyle_paper/results/perma_survey.csv",
+       col_names = TRUE)
+```
+
+An assumption of permanova is that each factor has equal multivariate spread. The month to month data does not meet this assumption.  
+
+```{R survey - checking for homogeneity with betadisper}
+# analogous to Levene's test for homogeneity of variances.
+
+# standardize data with wisconsin method, then calculate a matrix of Bray-Curtis distances
+dist <- vegdist(wisconsin(survey_comm_data), method = "bray")
+dispersion_salinity <- betadisper(dist, group=transect$salinity_regime)
+survey_disp_salnity <- permutest(dispersion_salinity) # equal variance between salinity regimes
+
+survey_disp_salnity_df <- data.frame(Df = survey_disp_salnity$tab$Df, 
+           SS = survey_disp_salnity$tab$`Sum Sq`,
+           MS = survey_disp_salnity$tab$`Mean Sq`, 
+           `F` = survey_disp_salnity$tab$`F`,
+           N.Perm = survey_disp_salnity$tab$N.Perm,
+           `Pr(>F)` = survey_disp_salnity$tab$`Pr(>F)`)
+
+survey_disp_salnity_df[is.na(survey_disp_salnity_df)] <- ""
+
+write_csv(survey_disp_salnity_df, here::here("results", "survey_disp_salnity.csv"))
+
+dispersion_month <- betadisper(dist, group=transect$month)
+survey_disp_month <- permutest(dispersion_month)# different variances between months
+survey_disp_month_df <- data.frame(Df = survey_disp_month$tab$Df, 
+           SS = survey_disp_month$tab$`Sum Sq`,
+           MS = survey_disp_month$tab$`Mean Sq`, 
+           `F` = survey_disp_month$tab$`F`,
+           N.Perm = survey_disp_month$tab$N.Perm,
+           `Pr(>F)` = survey_disp_month$tab$`Pr(>F)`)
+
+survey_disp_month_df[is.na(survey_disp_month_df)] <- ""
+
+write_csv(survey_disp_month_df, here::here("results", "survey_disp_month.csv"))
+
+png("survey_betadisper_month.png")
+plot(dispersion_month, hull=FALSE, ellipse=TRUE) ## sd ellipse
+dev.off()
+
+png("survey_betadisper_salinity.png")
+plot(dispersion_salinity, hull=FALSE, ellipse=TRUE) ##sd ellipse
+dev.off()
+
+TukeyHSD(dispersion_month) # May and June have different amounts of variance compared to July
+
+```
+### Simper analysis
+
+```{r survey simper} 
+transect_salinity_species_contributions <- simper(wisconsin(survey_comm_data), group = survey_env_data$salinity_regime, permutations = perm)
+
+summary(transect_salinity_species_contributions)
+
+transect_month_species_contributions <- simper(wisconsin(survey_comm_data), group = survey_env_data$month, permutations = perm)
+
+```
+
+##### Ordination - Sessile vs Mobile
+I'm splitting up the sessile and mobile species because the former were measured as percent cover and the latter as total number, to compare the end results 
+
+###### Sessile NMDS & Permanova
+```{R NMDS - Transect: sessile, eval = FALSE, echo = FALSE}
+# transect_sessile <- transect %>% 
+#   select(1:5, str_subset(names(transect), "pt"))
+# 
+# survey_comm_sessile_data <- transect_sessile %>% 
+#   select(-c(1:5, "barnacles_total_pt", "greens_pyropia_pt", "reds_pt", "reds_fucus_pt", "greens_pt"))
+# 
+# set.seed(35)
+# nmds_survey_sessile <- metaMDS(survey_comm_sessile_data, k = 3, trymax = 100, trace = TRUE, autotransform = TRUE, distance = "bray")
+# 
+# nmds_survey_sessile
+# 
+# ## Prepping plot
+# ef <- envfit(nmds_survey_sessile, salinity, permu = 999)
+# ef_coord_cont <-  as.data.frame(scores(ef, "vectors"))
+# 
+# #extract NMDS scores (x and y coordinates)
+# data.scores <- as.data.frame(scores(nmds_survey_sessile))
+# 
+# #add columns to data frame 
+# data.scores$Site <- transect_sessile$site
+# data.scores$Month <- transect_sessile$month
+# data.scores$Salinity <- transect_sessile$salinity_regime
+# 
+# ggplot(data = data.scores, aes(x = NMDS1, y = NMDS2)) + 
+#   geom_point(aes(shape = Month, colour = Salinity), size = 4) + 
+#    scale_colour_manual(values = c("orange", "steelblue"))  + 
+#   # geom_segment(aes(x = 0, y = 0, xend = NMDS1, yend = NMDS2), 
+#   #      data = ef_coord_cont, size =1, alpha = 0.5, colour = "grey30") + 
+#   stat_ellipse(aes(colour = Salinity, linetype = Month)) 
+# 
+# ## Plotting with ellipses for Site instead and leaving month info out 
+# ggplot(data = data.scores, aes(x = NMDS1, y = NMDS2)) + 
+#   geom_point(aes(colour = Salinity), size = 4) + 
+#    scale_colour_manual(values = c("orange", "steelblue"))  + 
+#   # geom_segment(aes(x = 0, y = 0, xend = NMDS1, yend = NMDS2), 
+#   #      data = ef_coord_cont, size =1, alpha = 0.5, colour = "grey30") + 
+#   stat_ellipse(aes(colour = Salinity, linetype = Site))
+
+```
+
+The permanova with only sessile animals gives the same result as the full model 
+```{R Permanova - Transect: sessile, eval = FALSE, echo = FALSE} 
+
+# perm <- how(within = Within(type = "free", mirror = TRUE), 
+#      plots = Plots(strata = transect_sessile$site, mirror = TRUE, type = "free"), 
+#      blocks = NULL) # maintaining the dependence of quadrats along a transect
+# 
+# survey_perma_sessile <- adonis(survey_comm_sessile_data ~ salinity_regime * month, data = transect_sessile, permutations = perm, method = "bray") # take site out of adonis call 
+# 
+# survey_perma_sessile 
+
+```
+
+###### Mobile NMDS & Permanova
+```{R NMDS - Transect: mobile, eval = FALSE, echo = FALSE}
+# transect_mobile <- transect %>% 
+#   select(1:5, str_subset(names(transect), "no$"))
+# 
+# survey_comm_mobile_data <- transect_mobile %>% 
+#   select(-c(1:5, "littorina_total_no", "all_limpets_no", "gastropods_no"))
+# 
+# set.seed(45)
+# nmds_survey_mobile <- metaMDS(survey_comm_mobile_data, k = 3, trymax = 100, trace = TRUE, autotransform = TRUE, distance = "bray")
+# 
+# nmds_survey_mobile
+# 
+# ## Prepping plot
+# ef <- envfit(nmds_survey_mobile, salinity, permu = 999)
+# ef_coord_cont <-  as.data.frame(scores(ef, "vectors"))
+# 
+# #extract NMDS scores (x and y coordinates)
+# data.scores <- as.data.frame(scores(nmds_survey_mobile))
+# 
+# #add columns to data frame 
+# data.scores$Site <- transect_mobile$site
+# data.scores$Month <- transect_mobile$month
+# data.scores$Salinity <- transect_mobile$salinity_regime
+# 
+# ggplot(data = data.scores, aes(x = NMDS1, y = NMDS2)) + 
+#   geom_point(aes(shape = Month, colour = Salinity), size = 4) + 
+#    scale_colour_manual(values = c("orange", "steelblue"))  + 
+#   # geom_segment(aes(x = 0, y = 0, xend = NMDS1, yend = NMDS2), 
+#   #      data = ef_coord_cont, size =1, alpha = 0.5, colour = "grey30") + 
+#   stat_ellipse(aes(colour = Salinity, linetype = Month)) 
+# 
+# ## Plotting with ellipses for Site instead and leaving month info out 
+# ggplot(data = data.scores, aes(x = NMDS1, y = NMDS2)) + 
+#   geom_point(aes(colour = Salinity), size = 4) + 
+#    scale_colour_manual(values = c("orange", "steelblue"))  + 
+#   # geom_segment(aes(x = 0, y = 0, xend = NMDS1, yend = NMDS2), 
+#   #      data = ef_coord_cont, size =1, alpha = 0.5, colour = "grey30") + 
+#   stat_ellipse(aes(colour = Salinity, linetype = Site))
+
+```
+
+The permanova with only mobile animals also gives the same result as the full model 
+```{R Permanova - Transect: mobile, eval = FALSE, echo = FALSE} 
+
+# perm <- how(within = Within(type = "free", mirror = TRUE), 
+#      plots = Plots(strata = transect_mobile$site, mirror = TRUE, type = "free"), 
+#      blocks = NULL) # maintaining the dependence of quadrats along a transect
+# 
+# survey_perma_mobile <- adonis(survey_comm_mobile_data ~ salinity_regime * month, data = transect_mobile, permutations = perm, method = "bray") # take site out of adonis call 
+# 
+# survey_perma_mobile 
+
+```
+
+
+### Field experimental data  
+
+#### Prepping the dataset: 
+
+Now I am going to ordinate the experimental field data in the same way as above. We are only considering the month of July. I'm going to take out the cumulative columns: greens, reds, greens_pyropia, reds_fucus becasue they include species already accounted for in other columns. 
+
+```{r prep experiment dataset}
+exp <- read_csv(here::here("data", "tidy", "field_exclusion_tidy.csv"))
+
+exp <- exp %>% 
+  unite(col = "site_rep_treatment", c("site", "replicate", "treatment"), sep = "_", remove = FALSE) %>% 
+  dplyr::mutate(treatment = factor(treatment), 
+         site = factor(site, levels = c("Eagle Cove", "Hailstorm 2", "Ruckle", "Horseshoe Bay", "Lions Bay 2", "Rope Site 2")))
+  
+exp_comm_data <- exp %>% 
+  dplyr::select(-c("greens_pyropia", "reds", "reds_fucus", "greens")) %>% 
+  dplyr::select(balanus_no:fucus_pt)
+```  
+
+#### NMDS on field experiment
+
+Finding the number of axes that limit the stress on the ordination for the experimental data. 
+```{r experiment stress vs dimensions, echo = FALSE, eval= TRUE}
+# Fit NMDS solutions for a number of k
+k_vec <- 1:10
+stress <- numeric(length(k_vec))
+exp_dij <- metaMDSdist(exp_comm_data, autotransform = TRUE, trace = FALSE, distance = "bray")
+
+set.seed(25)
+for(i in seq_along(k_vec)) {
+    sol <- metaMDSiter(exp_dij, k = i,
+                       trace = FALSE)
+    stress[i] <- sol$stress
+}
+
+par(mfrow = c(1,1))
+plot(k_vec, stress, type = "b", ylab = "Stress",
+     xlab = "Dimensions")
+```
+
+Performing a Wisconsin data transformation within the NMDS:
+```{r experiment NMDS with wisconsin transformation, echo = FALSE, eval=TRUE}
+
+set.seed(1986)
+nmds_exp <- metaMDS(exp_comm_data, k = 3, trymax = 100, trace = TRUE, autotransform = TRUE, distance = "bray")
+
+nmds_exp
+
+gof_exp <- goodness(nmds_exp)
+
+stressplot(nmds_exp)
+plot(nmds_exp, type = "t", main = "goodness of fit")
+points(nmds_exp, display ="sites", cex = gof_exp*100)
+```
+
+Plotting the results: 
+```{r prepping the experiment NMDS plots, echo = FALSE, eval=TRUE}
+
+#extract NMDS scores (x and y coordinates)
+data.scores = as.data.frame(scores(nmds_exp))
+
+#add columns to data frame 
+data.scores$Site <-  exp$site
+data.scores$Salinity <-  exp$region
+data.scores$Treatment <-  exp$treatment
+ 
+head(data.scores)
+```
+
+```{R NMDS Experimental Plot with salinity and treatment ellpises, echo = FALSE, eval=TRUE, fig.width= 8, fig.height = 6}
+exp_nmds <- ggplot(data = data.scores, aes(x = NMDS1, y = NMDS2)) + 
+  geom_point(aes(shape = Treatment, colour = Salinity)) + 
+   scale_colour_manual(values = c("orange", "steelblue"))  + 
+  stat_ellipse(aes(color = Salinity, linetype = Treatment)) + 
+     theme(axis.title = element_text(size = 10, face = "bold", colour = "grey30"), 
+       panel.background = element_blank(), panel.border = element_rect(fill = NA, colour = "grey30"), 
+       axis.ticks = element_blank(), axis.text = element_blank(), legend.key = element_blank(), 
+       legend.title = element_text(size = 10, face = "bold", colour = "grey30"), 
+       legend.text = element_text(size = 9, colour = "grey30")) + 
+     labs(colour = "Treatment")
+
+exp_nmds
+
+ggsave(filename = "exp_nmds.png", plot = exp_nmds, path = here::here("figures"), width = 16, height = 10, units = "cm")
+```
+
+
+#### Permanova on field experiment:   
+```{R Experiment: permanova, echo = FALSE}
+
+exp_env_data <- exp %>%
+  dplyr::select(site, region, treatment, replicate) %>% 
+  dplyr::mutate(region = factor(region))
+
+perm_site <- how(within = Within(type = "free"), 
+     plots = Plots(strata = exp_env_data$site, type = "free"), 
+     blocks = NULL) 
+# View(exp_env_data[as.data.frame(shuffle(exp_env_data, perm))[ , ], ])
+
+# perm_region <- how(within = Within(type = "free"), 
+#      plots = Plots(strata = exp_env_data$region, type = "free"), 
+#      blocks = NULL) # maintaining the dependence of quadrats along a transect
+# View(exp_env_data[as.data.frame(shuffle(exp_env_data, perm))[ , ], ])
+set.seed(2000)
+exp_perma_site <- adonis(exp_comm_data ~ region * treatment, data = exp_env_data, permutations = perm_site, method = "bray")
+
+# exp_perma_region <- adonis(exp_comm_data ~ region * treatment, data = exp_env_data, permutations = perm_region, method = "bray")
+
+exp_perma_site
+
+# exp_perma_region
+
+# Without any restrictions on permutation
+# exp_perma_free <- adonis(exp_comm_data ~ region * treatment, data = exp_env_data, permutations = 999, method = "bray")
+# 
+# exp_perma_free
+
+df <- data.frame(treatments = c("salinity region", "treatment", "salinity region x treatment", "residuals", "total"), df = exp_perma_site$aov.tab$Df, SS = exp_perma_site$aov.tab$SumsOfSqs, MS = exp_perma_site$aov.tab$MeanSqs, `pseudo F` = exp_perma_site$aov.tab$F.Model, R2 = exp_perma_site$aov.tab$R2, `p value` = exp_perma_site$aov.tab$`Pr(>F)`)
+
+df[ , 3:6] <- round(df[, 3:6], 2)
+
+write_csv(df, "/Users/sandraemry/Documents/coyle_paper/results/perma_exp.csv",
+       col_names = TRUE)
+
+```
+
+Are there different levels of dispersion in region and treatment?
+```{R Experiment: checking for homogeneity with betadisper}
+# analogous to Levene's test for homogeneity of variances.
+
+# standardize data with wisconsin method, then calculate a matrix of Bray-Curtis distances
+dist <- vegdist(wisconsin(exp_comm_data), method = "bray")
+dispersion_salinity <- betadisper(dist, group = exp_env_data$region)
+exp_disp_salinity <- permutest(dispersion_salinity) # greater dispersion in high salinity region
+
+exp_disp_salinity_df <- data.frame(Df = exp_disp_salinity$tab$Df, 
+           SS = exp_disp_salinity$tab$`Sum Sq`,
+           MS = exp_disp_salinity$tab$`Mean Sq`, 
+           `F` = exp_disp_salinity$tab$`F`,
+           N.Perm = exp_disp_salinity$tab$N.Perm,
+           `Pr(>F)` = exp_disp_salinity$tab$`Pr(>F)`)
+
+exp_disp_salinity_df[is.na(exp_disp_salinity_df)] <- ""
+
+write_csv(exp_disp_salinity_df, here::here("results", "exp_disp_treatment.csv"))
+
+dispersion_treatment <- betadisper(dist, group=exp_env_data$treatment)
+exp_disp_treatment <- permutest(dispersion_treatment) # greater dispersion in the control
+
+exp_disp_treatment_df <- data.frame(Df = exp_disp_treatment$tab$Df, 
+           SS = exp_disp_treatment$tab$`Sum Sq`,
+           MS = exp_disp_treatment$tab$`Mean Sq`, 
+           `F` = exp_disp_treatment$tab$`F`,
+           N.Perm = exp_disp_treatment$tab$N.Perm,
+           `Pr(>F)` = exp_disp_treatment$tab$`Pr(>F)`)
+
+exp_disp_treatment_df[is.na(exp_disp_treatment_df)] <- ""
+
+write_csv(exp_disp_treatment_df, here::here("results", "exp_disp_salnity.csv"))
+
+par(mfrow = c(1,2))
+plot(dispersion_salinity, hull = FALSE, ellipse = TRUE) # sd ellipse
+plot(dispersion_treatment, hull = FALSE, ellipse = TRUE) # sd ellipse
+
+png("exp_betadisper_treatment.png")
+plot(dispersion_treatment, hull=FALSE, ellipse=TRUE) ## sd ellipse
+dev.off()
+
+png("exp_betadisper_salinity.png")
+plot(dispersion_salinity, hull=FALSE, ellipse=TRUE) ##sd ellipse
+dev.off()
+
+```
+
+Permanova is showing only treatment is significant, but the NMDS plot looks like both trmt, region and their interaction should be significant. I'm going to try and pull out the high salinity, control plot that looks like it might be causing the non-significance. 
+```{R Experiment NMDS investigating, eval = FALSE, echo = FALSE}
+# #plotting with the site numbers so I can figure out what it is 
+# ordiplot(nmds_exp, type = "n")
+# orditorp(nmds_exp, display = "sites", cex = 1.25, air = 0.01) #looks like it's row 2
+# exp_env_data[2,]
+# exp_comm_data[2,] #only balanus and ulva in the plot 
+# 
+# control_high_plots <- exp_comm_data_withoutI[which(exp_env_data_withoutI$region == "High" & exp_env_data_withoutI$treatment == "C"), ] 
+#   
+# tibble %>% rmarkdown::paged_table(control_high_plots)
+```
+
+It might be the presence of Ulva in the plots that is causing it to look more like the low salinity plots. I'm going to do a permanova without that plot anyway to see whether it makes a difference. Whoops never mind I can't because then the sites are unbalanced. I'm going to balance it by randomly taking out a sample from each site just so I can see whether it makes a difference.  
+
+```{R Experiment permanova - taking out problematic plot, eval = FALSE, echo = FALSE}
+# exp_env_data_n6 <- exp_env_data[-c(1,2,15,16,29,30,43,44,57,58,71,72), ]
+# exp_comm_data_n6 <- exp_comm_data[-c(1,2,15,16,29,30,43,44,57,58,71,72), ]
+# # 
+# perm_site <- how(within = Within(type = "free"),
+#     plots = Plots(strata = exp_env_data_n6$site, type = "free"),
+#     blocks = NULL) # maintaining the dependence of quadrats along a transect
+# # View(exp_env_data[as.data.frame(shuffle(exp_env_data, perm))[ , ], ])
+# # 
+# exp_perma_noI_site <- adonis(exp_comm_data_n6 ~ region * treatment, data = exp_env_data_n6, permutations = perm_site, method = "bray")
+# # 
+# exp_perma_noI_site ## all significant 
+```
+
+
+NMDS on experiment data when simplified to presence/absence
+```{R Experiment NMDS: presence/absence}
+
+exp_comm_data_PA <- exp_comm_data
+for (i in 1:nrow(exp_comm_data)){
+  for (j in 1:ncol(exp_comm_data)){
+    if (exp_comm_data[i,j] > 0){
+      exp_comm_data_PA[i,j] <-1
+    }
+  }
+}
+
+set.seed(1126)
+nmds_exp_PA <- metaMDS(exp_comm_data_PA, k = 2, trymax = 100, trace = TRUE, autotransform = FALSE, distance = "jaccard")
+
+nmds_exp_PA
+
+gof_exp <- goodness(nmds_exp_PA)
+
+stressplot(nmds_exp_PA)
+plot(nmds_exp_PA, type = "t", main = "goodness of fit")
+points(nmds_exp_PA, display ="sites", cex = gof_exp*100)
+
+# ef <- envfit(nmds_exp_PA, env_factors, permu = 999)
+
+#extract NMDS scores (x and y coordinates)
+data.scores = as.data.frame(scores(nmds_exp_PA))
+
+#add columns to data frame 
+data.scores$Site <-  exp$site
+data.scores$Salinity <-  exp$region
+data.scores$Treatment <-  exp$treatment
+ 
+head(data.scores)
+
+exp_PA_nmds <- ggplot(data = data.scores, aes(x = NMDS1, y = NMDS2)) + 
+  geom_point(aes(shape = Treatment, colour = Salinity), alpha = 0.5) + 
+   scale_colour_manual(values = c("orange", "steelblue"))  + 
+  stat_ellipse(aes(color = Salinity, linetype = Treatment)) + 
+     theme(axis.title = element_text(size = 10, face = "bold", colour = "grey30"), 
+       panel.background = element_blank(), panel.border = element_rect(fill = NA, colour = "grey30"), 
+       axis.ticks = element_blank(), axis.text = element_blank(), legend.key = element_blank(), 
+       legend.title = element_text(size = 10, face = "bold", colour = "grey30"), 
+       legend.text = element_text(size = 9, colour = "grey30")) + 
+     labs(colour = "Treatment")
+
+ggsave(filename = "exp_PA_nmds.png", plot = exp_PA_nmds, path = here::here("figures"), width = 16, height = 10, units = "cm")
+```
+
+Collapsing to presence/absence. Region, treatment and interaction are significant
+
+```{R Experiment: permanova with presence/absence}
+  
+# when performed on presence absence data then the interaction is significant 
+perm_site <- how(within = Within(type = "free"),
+    plots = Plots(strata = exp_env_data$site, type = "free"),
+    blocks = NULL)
+
+exp_perma_PA <- adonis(exp_comm_data ~ region * treatment, data = exp_env_data, permutations = perm_site, method = "jaccard", binary = TRUE)
+
+exp_perma_PA
+
+df <- data.frame(treatments = c("salinity region", "treatment", "salinity region x treatment", "residuals", "total"), df = exp_perma_PA$aov.tab$Df, SS = exp_perma_PA$aov.tab$SumsOfSqs, MS = exp_perma_PA$aov.tab$MeanSqs, `pseudo F` = exp_perma_PA$aov.tab$F.Model, R2 = exp_perma_PA$aov.tab$R2, `p value` = exp_perma_PA$aov.tab$`Pr(>F)`)
+
+df[ , 3:6] <- round(df[, 3:6], 2)
+
+write_csv(df, "/Users/sandraemry/Documents/coyle_paper/results/perma_exp_PA.csv",
+       col_names = TRUE)
+```
+
+###### Separating to algae vs animals
+I can't separate this way because the design is again unbalanced! There are plots with no algae in them 
+```{R NMDS Algae vs Inverts, eval = FALSE, echo = FALSE}
+  
+exp_comm_data_algae <- exp_withoutI %>% 
+  select(fucus_pt, pyropia_pt, ulva_pt, diatom_pt, masto_crust_pt)
+
+#getting rid of plots with no algae because I can't perform a permanova with them included
+exp_env_data_withoutI_algae <- exp_env_data_withoutI[-which(rowSums(exp_comm_data_algae) == 0), ]
+exp_comm_data_algae <- exp_comm_data_algae[-which(rowSums(exp_comm_data_algae) == 0), ]
+
+exp_env_data_withoutI_algae %>% group_by(site) %>% tally() #unbalanced
+  
+```
+###### Separating to sessile vs mobile 
+Also can't do this because many plots don't have any mobile inverts in them
+```{R Exp NMDS Sessile vs Mobile, eval = FALSE, echo = FALSE}
+exp_comm_data_sessile <- exp_withoutI %>% 
+  select(balanus_no, chthamalus_no, mytilus_pt, pyropia_pt, fucus_pt, ulva_pt, diatom_pt, masto_crust_pt)
+
+rowSums(exp_comm_data_sessile)
+
+exp_comm_data_mobile <- exp_withoutI %>% 
+  select(pelta_no, paradigitalis_no, unknown_limpets_no, littorina_spp_no, amphipod_no)
+
+rowSums(exp_comm_data_mobile) # lots of plots with 0s :(
+
+```

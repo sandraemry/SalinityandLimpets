@@ -1,0 +1,612 @@
+---
+title: "Salinity variation, trophic interactions and community structure on rocky shores"
+author: "T.A. Coyle, S.M. Emry, R.L. Kordas, & C.D.G. Harley"
+date: "04/01/2022"
+output: html_document
+---
+
+```{r, echo = FALSE, message = FALSE, warning = FALSE}
+
+library(tidyverse)
+library(here)
+library(knitr)
+library(magick)
+library(vegan)
+library(cowplot)
+library(kableExtra)
+
+knitr::opts_chunk$set(echo = FALSE, out.width = "80%", fig.align="center")
+
+```
+# Questions  
+This project set out to measure the direct and indirect effects of spatiotemporal variation in salinity on intertidal community structure in the Strait of Georgia, British Columbia. We asked the following questions:  
+
+1. How does the intertidal community vary in low vs. high salinity sites across the span of a summer?  
+2. What is the relative impact of grazers in structuring rocky intertidal systems in low vs. high salinity sites?  
+3. What is the salinity tolerance of limpets?  Is this impacted by emersion from hyposaline conditions during low tides? or by local adaption to salinity regimes?  
+4. What is the salinity tolerance of *Ulva*?  
+
+
+# Hypotheses
+We predicted that observed differences in community structure between consistently high salinity environments and periodically low salinity environments would be driven by trophic effects as well as physiological stress. We hypothesized that limpets and other marine gastropods are disproportionately affected by the annual decrease in surface salinity experienced in the coastal areas near the mouth of the Fraser River. We further predicted that the abundance of gastropods in periodically low salinity environments would be lower than that of consistently high salinity areas around the Southern Gulf Islands. This reduction in gastropod grazers would lead to a reduction in grazing pressure on palatable green algae, biofilms and algal spores, resulting in greater algal cover in low salinity environments. Increased algal abundance has been shown to negatively impact barnacle species (Farrell 1991), and we therefore predicted lower barnacle abundance in low salinity sites. To test these predictions, we combined laboratory salinity tolerance trials on limpets and green algae with transect surveys and limpet exclusion/inclusion experiments at three sites within each of the two salinity regions.
+
+# Methods
+
+### Site description
+We conducted field studies at three sites within each of two regions with contrasting salinity regimes: West Vancouver, which experiences reduced salinities during the summer, and the Southern Gulf Islands, which experience consistently high salinities year-round. West Vancouver is located approximately 30km north of the Fraser River outflow, and the Southern Gulf Islands are located approximately 30 km southwest (Fig. 1). Gulf island sites are located on the southwest side of the island chain, and are not exposed to the Fraser River plume. The two areas are similar in terms of climate and topography. Sea surface temperature in the two regions is comparable, ranging from 5.0 to 18.5 in West Vancouver and 6.0 to 18.5 in the Gulf Islands (Fisheries and Oceans Canada 2009). The tidal range is greater in West Vancouver, with extreme high tides reaching 4.7 m above Canadian chart datum (approximated as the lowest astronomical tide), compared to 3.4 m above chart datum in the Gulf Islands. All sites were composed of granite rock except HS1, which was sandstone. The slope of the rock face ranged from 1 to 37º and aspect ranged from 40 to 320º east of magnetic north.  
+
+```{r study region, fig.cap = "Figure 1: Map of the study region. Low salinity sites are located in West Vancouver and high salinity sites are located in the Gulf Islands."}
+include_graphics("/Users/sandraemry/Documents/coyle_paper/figures/site_descriptions.jpg")
+```
+
+### Experimental design 
+
+*Transect Surveys*  
+Surveys were conducted once per month during low tide from May to August 2011, at each of the six study sites. Because the tidal range differs between the two areas, surveys were conducted at the vertical height corresponding to approximately 30% submersion time. This occurs at 2.1 m in the Southern Gulf Islands and 3.0 m in West Vancouver. Ten meters of transect tape were laid across the selected area and eight randomly selected points were surveyed using a 25x25 cm quadrat. Mobile invertebrates were counted and sessile invertebrates and algae were measured by percent cover.  
+
+*Field Exclusion Experiment*  
+Seven sub-sites within each of the six study sites (HS1, HS2, HS3, LS1, LS2 and LS3) were manually cleared of organisms. Within each sub-site, a limpet inclusion, exclusion and control plot were set. Inclusions and exclusions were formed by securing two copper fences, 2.5 cm high and 28.5 cm in diameter, to the rock face using Quickcrete® quick drying cement. Copper enclosures/exclosures of this type have been shown to be effective barriers to limpets (Harley 2002) and partial barriers to periwinkles (Harley 2006). Four *Lottia pelta*, 20±5 mm in diameter, were collected from the nearby shoreline within each site and placed into rings designated as limpet inclusion treatments. This density of 0.63 limpets per 100 cm², approximately corresponds to the average density of limpets in low salinity sites as determined by previous survey data (0.55 per 100 cm² in low salinity sites and 3.65 per 100 cm² in high salinity sites).  *L. pelta* were determined to be the largest grazer present in the mid-intertidal in both salinity regions, and body size of grazers has been shown to positively correlate with grazing pressure (Geller 1991). Any other grazers found inside rings were removed. Limpet treatment densities were maintained every two weeks by adding or removing limpets as necessary. One circular plot within each area, also 28.5 cm in diameter, was marked with steel bolts and served as a control. The position of control and treatments was randomized within each subsite. Copper controls were not included in this study, as previous work has shown that partial copper treatments lead to partial effects which are difficult to interpret (Johnson 1992).
+
+Sampling occurred once per month during low tide from May to August. A 10x10 cm quadrat was used to count mobile invertebrates and barnacles and estimate percent cover of algae and mussels within each treatment. Salinity samples were taken at each sampling event and measured using a refractometer (S/Mill-E, Atago Inc.).  
+
+### Statistical Analyses
+
+All analyses were performed in R version 4.1.2.  
+
+**Spatial and Temporal Variation in Salinity**  
+* Salinity data were analyzed with ?
+
+**Multivariate Analyses**  
+
+* Community data from the transect surveys and field exclusion experiment were analyzed using the *vegan* package version 2.5-7. Species abundances were relativized with a double Wisconsin transformation. This standardizes species to equal maxima, then sites to equal totals, putting equalize emphasis among sample units and among species. We ordinated the data with non-metric multidimensional scaling (nMDS) plots. We then performed a permutational multivariate analysis of variance (PERMANOVA) to test the null hypothesis that the centroids of the groups are equivalent. In order to respect the dependence of sampling blocks within a site, the permutation scheme was restricted such that all quadrats along a transect, and plots within a site, for the surveys and field experiment respectively, were always permuted together. In doing so, 199 permutations were run on a matrix of Bray-Curtis dissimilarities. Because PERMANOVA cannot distinguish between differences in centroid location or levels of dispersion, we also used a PERMDISP test with 999 permutations, to test if the variances of the groups are different.  
+  + Field exclusion experiment: Inclusion plots were not effective at containing *L. pelta* in the low salinity sites, therefore we only analyzed exclusion and control plots. A heat wave took place in August 2011 resulting in the die-off of many species, thus we only analyzed communities in the penultimate sampling point of July.
+* We plotted community trajectory data using the ecotraj package, version 0.0.1, which reflect the mean of the centroid for each of the 6 sites at each time point.
+
+**Univariate Analyses**
+
+*Transect Surveys*    
+Species abundance over time in low and high salinity sites were modelled with generalised linear models using the *glmmTMB* package version 1.1.2.3. Each species was modelled with month and salinity region as fixed factors, and a random effect of site nested within salinity region. For mobile invertebrates that were counted as total individuals (compared to percent cover), models were fit with with a negative binomial and poisson error distribution, with and without zero inflation. Sessile invertebrates and algal species were counted as percent cover of quadrats, and therefore we also fit models with a beta and a tweedie error distribution to these species. Models were then compared with the Akaike information criterion (AIC), and whichever had the lowest AIC value was chosen. Model diagnostics (residuals plots and Durbin-Watson tests) were run using the DHARMa package, version 0.4.4 (Hartig 2020). If variance across groups was unequal, we included a dispersion formula for either month, salinity region or both. Limpets, littorines, *Chthamalus dalli*, Red algae, Green algae and Brown algae were all fitted with a negative binomial distribution. *Balanus glandula* was fitted with a beta error distribution. To deal with the excessive number of zeros in the limpet count data, we also modelled these data with a zero-inflated negative binomial model. The significance of fixed effects was then tested using Wald $X^{2} tests in the car package version 3.0-11. Differences among the levels of the effects were tested using post-hoc pairwise comparisons, based on estimated marginal means using a Tukey adjustment with the emmeans package, version 1.6.3.
+
+*Field Exclusion Experiment*  
+To test whether our exclusion plots were effective at keeping grazers out, we pooled all grazer species (limpets and littorines) and fit a generalized linear model with a negative binomial error distribution and a dispersion formula for salinity region. Because all months prior to July were likely to impact community structure, we included data from May, June and July in this model only. We fit generalized linear models to *B. glandula*, *C. dalli*, all algae pooled together, algae split into taxonomic groups of red, brown and green, as well as split into species which are grazed and non-grazed by limpets. There was minimal amounts of red and brown algae, thus we are only including models for green algae, and all algal species pooled together. *C. dalli*, all algae species, and  green algae were all modelled as zero-inflated data as well. We were unable to fit a model including a random intercept of site nested within region to the *B. glandula* data without resulting in convergence issues. To resolve this, we fit the model with site as a fixed effect instead. 
+
+# Results  
+
+*Spatial and Temporal Variation in Salinity*  
+Surface salinities showed a seasonal pattern across all sites, with highest salinities occurring in the winter and early spring months (October to April) and lowest salinities occurring in the summer and early autumn (June to September) (Fig. 2). Salinity in the Gulf Islands was consistently higher than in West Vancouver (ANOVA, P<0.0001), and this difference was greatest in the summer months (May to August).
+
+```{r, fig.cap = "Figure 2: Measured surface salinity (psu) from sites in the Gulf Islands (shaded) and in West Vancouver (unshaded), British Columbia. Dashed line indicates Fraser River discharge rate (10³m³/s) measured at Hope, British Columbia (Environment Canada, 2012). Surface salinity for Eagle Cove, April 7, 2011, was influenced by heavy rainfall."}
+include_graphics("/Users/sandraemry/Documents/coyle_paper/figures/site_salinity.jpg")
+```
+
+
+### Multivariate Analyses
+
+*Transect Surveys*  
+
+A stable NMDS plot with 3 dimensions and a stress of 0.15 was reached after 30 tries. PERMANOVA showed a significant effect of salinity region (F = 81.176, p = 0.005; Table 1), month (F = 4.481, p = 0.005; Table 1), and the interaction between the two (F = 1.697, p = 0.005; Table 1) on community composition.   
+
+Plots from low and high salinity sites closely cluster together. In the low salinity sites, surveys from July and August begin to form slightly less variable clusters, which may be explained by the seasonal change in salinity at these sites. 
+
+```{r Transect surveys NMDS, fig.cap = "Figure 3: nMDS plot of community data collected from transect surveys from 3 high and 3 low salinity sites, collected summer 2011"}
+include_graphics("/Users/sandraemry/Documents/coyle_paper/figures/survey_nmds.png")
+```
+
+``` {R Transect Survey Permanova Table, echo = FALSE, message = FALSE }
+
+df <- as.data.frame(read_csv("/Users/sandraemry/Documents/coyle_paper/results/perma_survey.csv", col_names = TRUE))
+
+df[is.na(df)] <- " "
+
+df %>%   
+    kableExtra::kable(caption = "Table 1: Results of PERMANOVA analysis on Bray-Curtis dissimilarities for salinity region and month effects on intertidal communities.") %>% 
+  kableExtra::kable_styling(bootstrap_options = "striped", 
+                            full_width = F,
+                            position = "float_right")
+```
+
+
+A PERMDISP test revealed that dispersion among salinity groups was equal (F = 0.23, P > 0.05; table 2), but that May and June have less variance compared to September (F = 6.515, p = 0.001; table 3). As groups with different dispersions may result in misleadingly low p values, PERMANOVA results must be interpreted cautiously. 
+
+```{r Transect Survey Betadisper plots, fig.cap = "Figure 4: dispersion levels of centroids among salinity levels and during each month of sampling"}
+library(cowplot)
+library(ggplot2)
+
+p1 <- ggdraw() + draw_image("/Users/sandraemry/Documents/coyle_paper/figures/survey_betadisper_salinity.png")
+p2 <- ggdraw() + draw_image("/Users/sandraemry/Documents/coyle_paper/figures/survey_betadisper_month.png")
+
+plot_grid(p1, p2)
+
+```
+
+``` {R Transect Survey PERMDISP Salinity Region and Month Table, echo = FALSE, message = FALSE }
+
+df <- as.data.frame(read_csv("/Users/sandraemry/Documents/coyle_paper/results/survey_disp_salnity.csv", col_names = TRUE))
+
+df[is.na(df)] <- " "
+
+df %>%   
+    kableExtra::kable(caption = "Table 2: Results of PERMDISP analysis on Bray-Curtis dissimilarities for salinity region") %>% 
+  kableExtra::kable_styling(bootstrap_options = "striped", 
+                            full_width = F,
+                            font_size = 12,
+                            position = "float_left")
+
+df_2 <- as.data.frame(read_csv("/Users/sandraemry/Documents/coyle_paper/results/survey_disp_month.csv", col_names = TRUE))
+
+df_2[is.na(df_2)] <- " "
+
+df_2 %>%   
+    kableExtra::kable(caption = "Table 3: Results of PERMDISP analysis on Bray-Curtis dissimilarities for month") %>% 
+  kableExtra::kable_styling(bootstrap_options = "striped", 
+                            full_width = F,
+                            font_size = 12,
+                            position = "right")
+
+```
+
+*Simper analysis*  
+Which species contribute at least 70% of the differences between groups? 
+
+```{r Transect Survey simper, echo = F, warning=FALSE, cache=TRUE, include = F}
+## simper analysis on transect data
+transect <- read_csv(here::here("data", "tidy", "field_transect_tidy.csv"))
+
+survey_comm_data <- transect %>% # create community matrix 
+  select(balanus_pt:hermit_crab_no) %>% 
+  select(-c("barnacles_total_pt", "greens_pyropia_pt", "reds_pt", "reds_fucus_pt", "all_limpets_no", "littorina_total_no", "gastropods_no", "greens_pt"))
+
+survey_env_data <- transect %>% # environmental data
+  select(month, site, salinity_regime) %>% 
+  mutate(salinity_regime = factor(salinity_regime),
+         month = factor(month)) 
+
+perm <- how(within = Within(type = "free", mirror = TRUE), 
+     plots = Plots(strata = transect$site, mirror = TRUE, type = "free"), 
+     blocks = NULL) # maintaining the dependence of quadrats along a transect
+
+# simper analysis on salinity region 
+transect_salinity_species_contributions <-  simper(wisconsin(survey_comm_data), group = survey_env_data$salinity_regime, permutations = perm)
+
+## simper analysis on survey transect data by month 
+transect_month_species_contributions <- simper(wisconsin(survey_comm_data), group = survey_env_data$month, permutations = perm)
+
+# put results in a tibble
+salinity_species_contribution <- tibble(species = transect_salinity_species_contributions$H_L$species,
+       contribution = transect_salinity_species_contributions$H_L$average, p_value = transect_salinity_species_contributions$H_L$p, group = rep("salinity", 29))
+
+month_species_contribution <- tibble(species = c(transect_month_species_contributions$May_June$species, transect_month_species_contributions$May_July$species, transect_month_species_contributions$May_September$species,
+transect_month_species_contributions$June_July$species,
+transect_month_species_contributions$June_September$species,
+transect_month_species_contributions$July_September$species), 
+contribution = 
+  c(transect_month_species_contributions$May_June$average,
+transect_month_species_contributions$May_July$average,
+transect_month_species_contributions$May_September$average,
+transect_month_species_contributions$June_July$average,
+transect_month_species_contributions$June_September$average,
+transect_month_species_contributions$July_September$average), 
+group = c(rep("May_June", 29), rep("May_July", 29), rep("May_September", 29), rep("June_July", 29), rep("June_September", 29), rep("July_September", 29)), 
+p_value =   c(transect_month_species_contributions$May_June$p,
+transect_month_species_contributions$May_July$p,
+transect_month_species_contributions$May_September$p,
+transect_month_species_contributions$June_July$p,
+transect_month_species_contributions$June_September$p,
+transect_month_species_contributions$July_September$p))
+
+t1 <- month_species_contribution %>% 
+  group_by(group) %>% 
+  slice_max(contribution, n = 5) 
+  
+# arrange by highest to lowest contributors
+t2 <- salinity_species_contribution %>% 
+  slice_max(contribution, n = 5) 
+
+```
+  
+  
+```{r simper tables for transect surveys}
+t2 %>%
+  kableExtra::kable(caption = "Table 4: Results of Simper Analysis. Species that contribute the most to Bray-Curtis dissimilarities for salinity regions") %>%
+  kableExtra::kable_styling(full_width = FALSE, position = "float_left") %>% 
+  kableExtra::kable_styling(bootstrap_options = "striped", full_width = FALSE) 
+  
+t1 %>%
+  kableExtra::kable(caption = "Table 5: Results of Simper Analysis. Species that contribute the most to Bray-Curtis dissimilarities for different months") %>% 
+  kableExtra::kable_styling(full_width = FALSE, position = "left") %>% 
+  kableExtra::kable_styling(bootstrap_options = "striped", full_width = FALSE) 
+```
+
+```{r simper analysis - variance by contribution}
+  
+#calculate variance
+variance <- sum((survey_comm_data[ ,1] - mean(as_vector(survey_comm_data[ ,1])))^2)/(nrow(survey_comm_data) - 1)
+
+for (i in 2:ncol(survey_comm_data)){
+  a <- sum((survey_comm_data[ ,i] - mean(as_vector(survey_comm_data[ ,i])))^2)/(nrow(survey_comm_data) - 1)
+  variance <- append(variance, a)
+}
+
+variance <- tibble(variance, species = names(survey_comm_data))
+
+salinity_species_contribution$group <- rep("salinity", 29)
+
+var_cont_salinity <- left_join(salinity_species_contribution, variance, by = "species")
+
+var_cont_month <- left_join(month_species_contribution, variance, by = "species")
+
+var_cont <- rbind(var_cont_salinity, var_cont_month)  
+
+top_contributors <- var_cont %>% 
+  group_by(group) %>% 
+  slice_max(contribution, n=5) 
+
+top_contributors$label <- rep("yes", nrow(top_contributors))
+
+var_cont <- left_join(var_cont, top_contributors, by = c("species", "contribution", "group", "variance"))
+
+var_cont <- var_cont %>% 
+  mutate_at(vars(contains("label")), ~replace(., is.na(label), "no"))
+
+```
+A critique of simper analysis is that generally the species with the most variance also have the highest contribution. Even if you make groups that are copies of each other, the method will single out species with high contribution, but these are not contributions to non-existing between-group differences but to random noise variation in species abundances. Here I'm plotting species variance across all plots against their calculated contributions (Figure 5).
+
+```{r simper analysis plots, fig.cap = "Figure 5: variance vs contribution to dissimilarity matrix of each species"}
+
+var_cont %>% 
+  filter(variance != max(variance)) %>% 
+  ggplot(.) + 
+  geom_point(aes(x = variance, y = contribution)) 
+  
+```
+
+
+```{r simper analysis plots top 5 species, fig.cap = "Figure: Species with the most variance across all sites consistently have the highest contribution", eval=FALSE}
+var_cont %>% 
+  filter(variance != max(variance)) %>% 
+  group_by(group) %>% 
+  slice_max(variance, n = 5) %>% 
+  ggplot(.) + 
+  geom_point(aes(x = variance, y = contribution, color = label)) 
+
+
+```
+
+*Community Trajectories*
+
+The three low salinity sites experience dips in salinity seasonally as the Fraser River discharge increases. If salinity is a major determinant in the structure of intertidal communities, either directly through physiological tolerance of species or indirectly through changes in species interactions, we would expect larger changes in the trajectories of the three sites located closer to the FRE. In order to visualize this, we ordinated each sites trajectories in nMDS space (Figure 6). The three high salinity sites are all clustered close together and only diverge slightly throughout summer, whereas the three low salinity sites vary considerably at each time point. 
+
+
+```{r Transect Survey community trajectories, fig.cap = "Figure 6: Trajectories of intertidal communities at low and high salinity sites during the summer of 2011. Species abundances were averaged across 8 quadrats along a transect at each site and time point, and a matrix of Bray-Curtis dissimilarities was consructed."}
+
+include_graphics("/Users/sandraemry/Documents/coyle_paper/figures/survey_traj.png")
+```
+
+
+***Field Exclusion Experiment***  
+Species abundance: A stable NMDS plot with 3 dimensions and a stress of 0.11 was reached after 20 tries. PERMANOVA analysis revealed significant differences in the community composition of salinity region, grazer treatment and the interaction between the two. 
+
+We hypothesized that the exclusion plots in the high salinity sites would resemble the community structure in both the control and exclusion plots of the low salinity sites, due to the lack of limpet grazing. Both treatment (pseudo-F = , p value = 0.005; Table 6), as well as the interaction between salinity region and treatment (pseudo-F, p value = 0.025; Table 6) were significant. 
+
+```{r Experiment nMDS, fig.cap = "Figure 7: nMDS plot of community data from field exclusion experiment in high and low salinity sites from the summer of 2011."}
+include_graphics("/Users/sandraemry/Documents/coyle_paper/figures/exp_nmds.png")
+```
+
+``` {R Experiment Permanova Table, echo = FALSE, message = FALSE }
+df <- as.data.frame(read_csv("/Users/sandraemry/Documents/coyle_paper/results/perma_exp.csv", col_names = TRUE))
+
+df[is.na(df)] <- " "
+
+df %>%   
+    kableExtra::kable(caption = "Table 6: Results of PERMANOVA analysis done on Bray-Curtis dissimilarities for salinity region and grazer manipulation effects on intertidal communities.") %>% 
+  kableExtra::kable_styling(bootstrap_options = "striped", 
+                            full_width = F,
+                            position = "center")
+```
+
+A PERMDISP test revealed that dispersion among salinity groups was unequal (F = 17.3, P = 0.001; table 6), as well as dispersion among treatment groups (F = 7.5, p = 0.007; table 7). As groups with different dispersions may result in misleadingly low p values, PERMANOVA results must be interpreted cautiously. 
+
+```{r Experiment Betadisper plots, fig.cap = "Figure 8: dispersion levels of centroids among salinity levels and treatment levels"}
+library(cowplot)
+library(ggplot2)
+
+p1 <- ggdraw() + draw_image("/Users/sandraemry/Documents/coyle_paper/figures/exp_betadisper_salinity.png")
+p2 <- ggdraw() + draw_image("/Users/sandraemry/Documents/coyle_paper/figures/exp_betadisper_treatment.png")
+
+plot_grid(p1, p2)
+
+```
+
+``` {R Experiment PERMDISP Salinity Region and Treatment Table, echo = FALSE, message = FALSE}
+
+df <- as.data.frame(read_csv("/Users/sandraemry/Documents/coyle_paper/results/exp_disp_salnity.csv", col_names = TRUE))
+
+df[is.na(df)] <- " "
+
+df %>%   
+    kableExtra::kable(caption = "Table 6: Results of PERMDISP analysis on Bray-Curtis dissimilarities for salinity region") %>% 
+  kableExtra::kable_styling(bootstrap_options = "striped", 
+                            full_width = F,
+                            font_size = 12,
+                            position = "float_left")
+
+df_2 <- as.data.frame(read_csv("/Users/sandraemry/Documents/coyle_paper/results/exp_disp_treatment.csv", col_names = TRUE))
+
+df_2[is.na(df_2)] <- " "
+
+df_2 %>%   
+    kableExtra::kable(caption = "Table 7: Results of PERMDISP analysis on Bray-Curtis dissimilarities for treatment") %>% 
+  kableExtra::kable_styling(bootstrap_options = "striped", 
+                            full_width = F,
+                            font_size = 12,
+                            position = "right")
+
+```  
+
+*Simper analysis*  
+How much does each species contribute to the overall dissimilarity matrix among salinity regions (Table 8), and treatments (Table 9).
+
+```{r simper analysis for field exclusion data, include = F, cache = T}
+exp <- read_csv(here::here("data", "tidy", "field_exclusion_tidy.csv"))
+
+exp_env_data <- exp %>% 
+  select(treatment, region, site) %>% 
+  dplyr::mutate(treatment = factor(treatment), 
+         region = factor(region),
+         site = factor(site))
+  
+exp_comm_data <- exp %>% 
+  dplyr::select(-c("greens_pyropia", "reds", "reds_fucus", "greens")) %>% 
+  dplyr::select(balanus_no:fucus_pt)
+
+perm <- how(within = Within(type = "free"), 
+     plots = Plots(strata = exp_env_data$site, type = "free"), 
+     blocks = NULL) 
+
+# simper analysis on salinity region 
+exp_salinity_species_contributions <-  simper(wisconsin(exp_comm_data), group = exp_env_data$region, permutations = perm)
+
+## simper analysis on experiment data by treatment 
+exp_treatment_species_contributions <- simper(wisconsin(exp_comm_data), group = exp_env_data$treatment, permutations = perm)
+
+# put results in a tibble
+salinity_species_contribution <- tibble(species = exp_salinity_species_contributions$High_Low$species,
+       contribution = exp_salinity_species_contributions$High_Low$average, p_value = exp_salinity_species_contributions$High_Low$p, group = rep("salinity", 12))
+
+treatment_species_contribution <- tibble(species = exp_treatment_species_contributions$E_C$species,
+       contribution = exp_treatment_species_contributions$E_C$average, p_value = exp_treatment_species_contributions$E_C$p, group = rep("treatment", 12))
+
+t1 <- treatment_species_contribution %>% 
+  group_by(group) %>% 
+  slice_max(contribution, n = 5) 
+  
+# arrange by highest to lowest contributors
+t2 <- salinity_species_contribution %>% 
+  slice_max(contribution, n = 5) 
+
+```
+  
+  
+```{r simper tables for experiment}
+t2 %>%
+  kableExtra::kable(caption = "Table 8: Results of Simper Analysis. Species that contribute the most to Bray-Curtis dissimilarities for salinity regions") %>%
+  kableExtra::kable_styling(full_width = FALSE, position = "float_left") %>% 
+  kableExtra::kable_styling(bootstrap_options = "striped", full_width = FALSE) 
+  
+t1 %>%
+  kableExtra::kable(caption = "Table 9: Results of Simper Analysis. Species that contribute the most to Bray-Curtis dissimilarities for treatments") %>% 
+  kableExtra::kable_styling(full_width = FALSE, position = "left") %>% 
+  kableExtra::kable_styling(bootstrap_options = "striped", full_width = FALSE) 
+```
+
+
+### Univariate Analyses
+
+**Transect Surveys**
+
+*Invertebrates*  
+All limpet species were pooled and include primarily *Lottia paradigitalis*, but also *Lottia digitalis*, *Lottia pelta*, *Lottia scutum*, and *Lottia persona*. Limpet abundance is consistently higher in the high salinity region, and saw a decreased over the course of the summer in the low salinity region only. Littorines were also pooled together and consisted of *Littorina sitkana* and *Littorina scutulata*. Littorine abundance was only higher in the high salinity region during the month of July, before decreasing slightly; Littorines also experienced a small dip in abundance during July in the low salinity region. Abundance of *Balanus glandula* increased over the summer in both regions, and *Chthamalus dalli* was consistently higher in the high salinity sites (Figure 9).   
+
+```{r survey inverts, fig.cap = "Figure 9: Invertebrate species surveyed in 3 high and 3 low salinity sites during summer 2011"}
+include_graphics("/Users/sandraemry/Documents/coyle_paper/figures/survey_inverts_plot.png")
+```
+
+```{r survey inverts anova table, echo = FALSE, message = FALSE}
+df <- as.data.frame(read_csv("/Users/sandraemry/Documents/coyle_paper/results/survey_invert_anova_table.csv", col_names = TRUE))
+
+df %>%   
+    kableExtra::kable(caption = "Table 10: ANOVA test results, invertebrates from transects surveys") %>% 
+  kableExtra::kable_styling(bootstrap_options = "striped", 
+                            full_width = F,
+                            position = "left") %>% 
+  kableExtra::pack_rows("limpets", 1, 3) %>%
+  kableExtra::pack_rows("littorines", 4, 6) %>% 
+  kableExtra::pack_rows("balanus", 7, 8) %>%
+  kableExtra::pack_rows("chthamalus", 9, 10)
+
+```
+*Algae by taxonomic group*  
+  
+Red Algae consists of primarily *Pyropia*, and *Mastocarpus* (foliose and crust form), but also *Hildenbrandia*, *Endocladia*, *Microcladia*, and *Polysiphonia*. Green algae consists of primarily *Ulva spp*, but also *Urospora*, and *Acrosiphonia*. Brown algae consists primarly of *Fucus distichus*, but also *Melanosiphon spp*, and *Leathesia spp*. There is weak evidence of a decrease in red algae over the summer in both regions (F= 6.26, p = 0.09; table 11), but was consistently higher in the high salinity region (F = 13.25, p < 0.001; table 11). Green and brown algae increased in both regions over the summer (Figure 10).
+
+```{r survey taxonomic algae, fig.cap = "Figure 10: Algae divided into taxonomic groups, surveyed at 3 high and 3 low salinity sites during the summer of 2011."}
+include_graphics("/Users/sandraemry/Documents/coyle_paper/figures/survey_taxonomic_algae.png")
+```
+
+```{r survey taxonomic algae anova table, echo = FALSE, message = FALSE}
+
+df <- as.data.frame(read_csv("/Users/sandraemry/Documents/coyle_paper/results/survey_taxonomic_algae_anova_table.csv", col_names = TRUE))
+
+df %>%   
+    kableExtra::kable(caption = "Table 11: ANOVA test results, algae by taxonomy from transects surveys") %>% 
+  kableExtra::kable_styling(bootstrap_options = "striped", 
+                            full_width = F,
+                            position = "left") %>% 
+  kableExtra::pack_rows("brown algae", 1, 2) %>%
+  kableExtra::pack_rows("green algae", 3, 4) %>% 
+  kableExtra::pack_rows("red algae", 5, 6)
+
+```
+
+
+**Field Exclusion Experiment**
+
+*Grazers*   
+Grazer species are *Lottia paradigitalis*, *Lottia pelta*, *Lottia digitalis*, *Lottia scutum*, *Littorina scutulata*, and *Littorina sitkana*. Grazers were always more abundant in the high salinity sites, but decreased in numbers in the the exclusion plots (fig. 11).
+```{r experiment grazer plot, fig.cap = "figure 11: Grazer abundance in grazer exclusion vs. control plots in high and low salinity sites."}
+include_graphics("/Users/sandraemry/Documents/coyle_paper/figures/exp_grazers_plot.png")
+```
+
+```{r experiment grazer anova table, message = F}
+df <- as.data.frame(read_csv("/Users/sandraemry/Documents/coyle_paper/results/exp_grazers_anova_table.csv", col_names = TRUE))
+
+df %>%   
+    kableExtra::kable(caption = "Table 11: ANOVA test results, all grazers from field exclusion experiment") %>% 
+  kableExtra::kable_styling(bootstrap_options = "striped", 
+                            full_width = F,
+                            position = "left")
+```
+
+*Barnacles*  
+
+There were site level differences in *B. glandula* (F = 65.31, p < 0.001; Fig.12), and weak evidence of a treatment level effect (F = 2.64, p = 0.10; Fig.12) . *C. dalli* decreased in the grazer exclusion plots in the high salinity sites only.  
+```{r experiment barnacles, out.width = "100%", fig.cap = "Figure 12: Barnacle abundance in grazer exclusion vs. control plots in high and low salinity sites."}
+include_graphics("/Users/sandraemry/Documents/coyle_paper/figures/exp_barnacles_plot.png")
+```
+
+```{r balanus anova table, echo = FALSE, message = FALSE}
+df <- as.data.frame(read_csv("/Users/sandraemry/Documents/coyle_paper/results/exp_balanus_anova_table.csv", col_names = TRUE))
+
+df %>%   
+    kableExtra::kable(caption = "Table 13: ANOVA test results, balanus glandula from field exclusion experiement") %>% 
+  kableExtra::kable_styling(bootstrap_options = "striped", 
+                            full_width = F,
+                            position = "left") 
+```
+
+```{r chthamalus anova table, echo = FALSE, message = FALSE}
+df <- as.data.frame(read_csv("/Users/sandraemry/Documents/coyle_paper/results/exp_chthamalus_anova_table.csv", col_names = TRUE))
+
+df %>%   
+    kableExtra::kable(caption = "Table 14: ANOVA test results, Chthamalus dalli from field exclusion experiement") %>% 
+  kableExtra::kable_styling(bootstrap_options = "striped", 
+                            full_width = F,
+                            position = "left") 
+```
+
+*All algae*
+
+Algae percent cover increased in the grazer exclusion plots in the high salinity sites (figure 13). This includes reds, greens, browns and diatoms. 
+```{r experiment all algae, fig.cap = "Figure 13: Algae abundance in grazer exclusion vs. control plots in high and low salinity sites."}
+include_graphics("/Users/sandraemry/Documents/coyle_paper/figures/exp_allalgae.png")
+```
+
+```{r all algae anova table, echo = FALSE, message = FALSE}
+df <- as.data.frame(read_csv("/Users/sandraemry/Documents/coyle_paper/results/exp_algae_anova_table.csv", col_names = TRUE))
+
+df %>%   
+    kableExtra::kable(caption = "Table 15: ANOVA test results, All algae species pooled together, from field exclusion experiement") %>% 
+  kableExtra::kable_styling(bootstrap_options = "striped", 
+                            full_width = F,
+                            position = "left")
+```
+
+*Green Algae*  
+Green algae in the experimental plots consists exclusively of *Ulva*. In the high salinity region, when grazers were excluded green algal cover increased by 32% (Fig. 14).
+```{r experiment green algae, fig.cap = "Figure 14: Green algae abundance in grazer exclusion vs. control plots in high and low salinity sites."}
+include_graphics("/Users/sandraemry/Documents/coyle_paper/figures/exp_greenalgae.png")
+```
+
+```{r green algae anova table, echo = FALSE, message = FALSE}
+df <- as.data.frame(read_csv("/Users/sandraemry/Documents/coyle_paper/results/exp_green_algae_anova_table.csv", col_names = TRUE))
+
+df %>%   
+    kableExtra::kable(caption = "Table 16: ANOVA test results, All green algae species pooled together, from field exclusion experiement") %>% 
+  kableExtra::kable_styling(bootstrap_options = "striped", 
+                            full_width = F,
+                            position = "left")
+```
+
+# Supplementary Material 
+
+## Field Exclusion - multivariate
+Because plots were cleared in May, species were unlikely to have reached carrying capacity by July, and species abundance may not accurately depict the impact of the experimental manipulation. To account for this in our analysis, we also collapsed the data to presence/absence and re-ran the ordination and permutation as described above, on a matrix of Jaccard dissimilarities.
+
+```{r Experiment nMDS P/A, fig.cap = "Figure S1: nMDS plot of species richness data from field exlcusion experiment in high and low salinity sites."}
+include_graphics("/Users/sandraemry/Documents/coyle_paper/figures/exp_PA_nmds.png")
+```
+
+A PERMANOVA on community composition of the presence or absence of species found treatment (pseudo F = 8.97, p value = 0.005; Table S1), salinity region (pseudo F = 19.8, p value = 0.005; Table S1) and the interaction between the two (pseudo F = 8.38, p value = 0.005; Table S1) were significant.  
+
+``` {R Experiment Permanova P/A Table, echo = FALSE, message = FALSE }
+
+df <- as.data.frame(read_csv("/Users/sandraemry/Documents/coyle_paper/results/perma_exp_PA.csv", col_names = TRUE))
+
+df[is.na(df)] <- " "
+
+df %>%   
+    kableExtra::kable(caption = "Table S1: Results of PERMANOVA analysis done on Jaccard dissimilarities presence and absence of species, for salinity region and grazer manipulation effects on intertidal communities.") %>% 
+  kableExtra::kable_styling(bootstrap_options = "striped", 
+                            full_width = F,
+                            position = "left")
+```
+
+## Transect Surveys - univariate
+*Algae by functional group*  
+
+We also grouped algae by functional groups. 'Grazed' algae are filaments and sheets that are more likely to be consumed by invertebrates at a higher frequency, and consist of *Ulva*, *Pyropia*, *Polysiphonia*, Diatoms, *Urospora*, *Acrosiphonia*. 'Non-grazed' algae are turfs and crusts that are consumed at a lower frequency, and consist of *Fucus*, *Mastocarpus*, *Mastocarpus* crust, *Hildenbrandia*, *Endocladia*, *Melanosiphon*, *Leathesia*. Grazed algae increased over the summer in the low salinity region only, and non-grazed algae increased over the summer in both regions (Figure S2). 
+
+```{r survey functional algae, fig.cap = "Figure S2: Algae divided into functional groups, surveyed at 3 high and 3 low salinity sites during the summer of 2011."}
+include_graphics("/Users/sandraemry/Documents/coyle_paper/figures/survey_functional_algae.png")
+```
+
+```{r survey algae by functional anova table, echo = FALSE, message = FALSE}
+
+df <- as.data.frame(read_csv("/Users/sandraemry/Documents/coyle_paper/results/survey_functional_algae_anova_table.csv", col_names = TRUE))
+
+df %>%   
+    kableExtra::kable(caption = "Table S2: ANOVA test results, algae by functional group, from transect surveys") %>% 
+  kableExtra::kable_styling(bootstrap_options = "striped", 
+                            full_width = F,
+                            position = "left") %>% 
+  kableExtra::pack_rows("grazed algae", 1, 3) %>%
+  kableExtra::pack_rows("non grazed algae", 4, 6)
+
+```
+
+
+## Field Exclusion - univariate:
+*Algae by taxonomic group*
+```{r experiment algae by taxonomy, fig.cap = "Figure S3: Abundance of algae divided by taxonomic groups in grazer exclusion vs. control plots in high and low salinity sites."}
+include_graphics("/Users/sandraemry/Documents/coyle_paper/figures/exp_taxonomic_algae_plot.png")
+```
+
+```{r algae by taxonomy anova table, echo = FALSE, message = FALSE}
+df <- as.data.frame(read_csv("/Users/sandraemry/Documents/coyle_paper/results/exp_algae_taxonomy_anova_table.csv", col_names = TRUE))
+
+df %>%   
+    kableExtra::kable(caption = "Table S3: ANOVA test results, algae by taxonomy from field exlcusion experiment") %>% 
+  kableExtra::kable_styling(bootstrap_options = "striped", 
+                            full_width = F,
+                            position = "left") %>% 
+  kableExtra::pack_rows("brown algae", 1, 3) %>%
+  kableExtra::pack_rows("green algae", 4, 6) %>% 
+  kableExtra::pack_rows("red algae", 7, 9)
+```
+
+*Algae by functional group*
+```{r experiment algae by functional groups, fig.cap = "Figure S4: Abundance of algae divided by functional group in grazer exclusion vs. control plots in high and low salinity sites."}
+include_graphics("/Users/sandraemry/Documents/coyle_paper/figures/exp_functional_algae_plot.png")
+```
+
+```{r algae by functional group anova table, echo = FALSE, message = FALSE}
+df <- as.data.frame(read_csv("/Users/sandraemry/Documents/coyle_paper/results/exp_algae_function_anova_table.csv", col_names = TRUE))
+
+df %>%   
+    kableExtra::kable(caption = "Table S4: ANOVA test results, algae by taxonomy from field exlcusion experiment") %>% 
+  kableExtra::kable_styling(bootstrap_options = "striped", 
+                            full_width = F,
+                            position = "left") %>% 
+  kableExtra::pack_rows("grazed algae", 1, 3) %>%
+  kableExtra::pack_rows("non grazed algae", 4, 6) 
+```

@@ -1,0 +1,6 @@
+treatments,df,SS,MS,pseudo.F,R2,p.value
+salinity region,1,14.76,14.76,81.18,0.29,0.005
+month,3,2.44,0.81,4.48,0.05,0.005
+salinity region x month,3,0.93,0.31,1.7,0.02,0.005
+residuals,184,33.46,0.18,NA,0.65,NA
+total,191,51.6,NA,NA,1,NA

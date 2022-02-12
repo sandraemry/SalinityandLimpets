@@ -1,0 +1,43 @@
+---
+title: "Salinity variation, trophic interactions and community structure on rocky shores"
+author: "T.A. Coyle, S.M. Emry, R.L. Kordas, & C.D.G. Harley"
+date: "08/02/2022"
+output: 
+  bookdown::word_document2:
+    fig_caption: yes
+    toc: yes
+fontfamily: mathpazo
+fontsize: 11pt
+geometry: margin = 1in
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Abstract
+
+
+## Introduction
+
+## Materials and Methods
+
+## Results
+
+## Discussion
+
+## Acknowledgements
+
+## Declarations
+
+### Funding (information that explains whether and by whom the research was supported)
+### Conflicts of interest/Competing interests (include appropriate disclosures)
+### Ethics approval (include appropriate approvals or waivers)
+### Consent to participate (include appropriate statements)
+### Consent for publication (include appropriate statements)
+### Availability of data and material (data transparency)
+### Code availability (software application or custom code)
+### Authors' contributions
+
+## References
+
