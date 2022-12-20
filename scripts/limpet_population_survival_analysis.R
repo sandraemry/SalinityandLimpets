@@ -65,7 +65,7 @@ b <- ggplot(data = mean_survival, aes(x = salinity, y = rmean, colour = site)) +
   geom_errorbar(aes(ymin = rmean-se_rmean, ymax=rmean+se_rmean), width = 0.5) + 
   scale_color_manual(values = cols) + 
   scale_y_continuous(labels = c(5,10,15,20,25,30), breaks = c(5,10,15,20,25,30)) + 
-  labs(y = "RMST", x = "Salinity (psu)") +  
+  labs(y = "RMST (days)", x = "Salinity (psu)") +  
   theme(axis.title = element_text(size = 12, colour = "grey30"), 
         panel.background = element_blank(), 
         panel.border = element_rect(fill = NA, colour = "grey30"), 
@@ -80,27 +80,8 @@ ggsave("./figure/RMST_28days.png", plot = b, height = 8, width = 12)
 
 surv_plot_grid <- plot_grid(KMplot, b, labels = "auto", ncol = 1, rel_heights = c(1.5,1))
 
-ggsave("./figures/survival_plots_grid.png", plot = surv_plot_grid)
+ggsave("./figures/survival_plots_grid.png", plot = surv_plot_grid, height = 6, width = 9)
 
 
-# Cox proportional hazard -------------------------------------------------
-
-# raw_mort$salinity <- as.numeric(as.character(raw_mort$salinity))
-# raw_mort$site <- factor(raw_mort$site)
-# cox_model <- coxph(Surv(day, status) ~ site + salinity, data = raw_mort)
-# 
-# cox_model %>% gtsummary::tbl_regression(exp = TRUE)
-# summary(cox_model)
-# 
-# # checking diagnostic plots and stats
-# fit_test <- cox.zph(cox_model)
-# print(fit_test) # display the results: doesn't meet the assumptions of the test 
-# ggcoxzph(fit_test)
-# 
-# ggforest(cox_model, data = raw_mort)
-# 
-# cox_model <- coxph(Surv(time = day, event = status) ~ salinity + site, data = raw_mort)
-# 
-# summary(cox_model)
 
 
