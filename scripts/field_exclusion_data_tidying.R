@@ -74,5 +74,8 @@ field_exp <- cbind(field_exp_metadata, field_exp_data)
 
 rm(field_exp_metadata, field_exp_data)
 
+field_exp$treatment <- str_replace(field_exp$treatment, "C", "control") 
+field_exp$treatment <- str_replace(field_exp$treatment, "E", "exclusion")
+
 write_csv(field_exp, "./data/tidy/field_exclusion_tidy.csv")
 
