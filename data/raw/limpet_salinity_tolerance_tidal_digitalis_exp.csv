@@ -1,0 +1,105 @@
+﻿Tank,Salinity,Tide Treatment,# Days Survived,Size (mm)
+A,30,In,6,20
+A,30,In,6,12
+A,30,In,22,20
+A,30,In,50,
+A,30,Out,50,
+A,30,Out,50,
+A,30,Out,50,
+A,30,Out,50,
+B,20,In,6,17
+B,20,In,50,
+B,20,In,50,
+B,20,In,50,
+B,20,Out,4,11
+B,20,Out,6,21
+B,20,Out,6,16
+B,20,Out,9,17
+C,20,In,50,
+C,20,In,50,
+C,20,In,50,
+C,20,In,50,
+C,20,Out,50,
+C,20,Out,50,
+C,20,Out,50,
+C,20,Out,50,
+D,10,In,24,13
+D,10,In,24,23
+D,10,In,24,15
+D,10,In,24,17
+D,10,Out,24,15
+D,10,Out,24,20
+D,10,Out,24,17
+D,10,Out,25,17
+E,10,In,24,15
+E,10,In,25,20
+E,10,In,25,20
+E,10,In,25,15
+E,10,Out,24,17
+E,10,Out,24,18
+E,10,Out,24,17
+E,10,Out,24,20
+F,10,In,22,19
+F,10,In,22,17
+F,10,In,24,17
+F,10,In,24,14
+F,10,Out,9,20
+F,10,Out,9,20
+F,10,Out,26,17
+F,10,Out,26,16
+G,30,In,50,
+G,30,In,50,
+G,30,In,50,
+G,30,In,50,
+G,30,Out,4,19
+G,30,Out,50,
+G,30,Out,50,
+G,30,Out,50,
+H,20,In,6,17
+H,20,In,50,
+H,20,In,50,
+H,20,In,50,
+H,20,Out,8,10
+H,20,Out,50,
+H,20,Out,50,
+H,20,Out,50,
+I,20,In,50,
+I,20,In,50,
+I,20,In,50,
+I,20,In,50,
+I,20,Out,50,
+I,20,Out,50,
+I,20,Out,50,
+I,20,Out,50,
+J,30,In,50,
+J,30,In,50,
+J,30,In,50,
+J,30,In,50,
+J,30,Out,50,
+J,30,Out,50,
+J,30,Out,50,
+J,30,Out,50,
+K,10,In,6,17
+K,10,In,24,22
+K,10,In,24,19
+K,10,In,24,20
+K,10,Out,24,17
+K,10,Out,24,16
+K,10,Out,24,21
+K,10,Out,24,20
+L,30,In,34,16
+L,30,In,34,15
+L,30,In,50,
+L,30,In,50,
+L,30,Out,50,
+L,30,Out,50,
+L,30,Out,50,
+L,30,Out,50,
+No Tank,31,In,50,
+No Tank,31,In,50,
+No Tank,31,In,50,
+No Tank,31,In,50,
+No Tank,31,Out,14,16
+No Tank,31,Out,50,
+No Tank,31,Out,50,
+No Tank,31,Out,50,
