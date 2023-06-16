@@ -6,14 +6,14 @@ library(gridExtra)
 massdata <- read_csv("./data/tidy/ulva_mass_expmt.csv")
 etrdata <- read_csv("./data/tidy/ulva_etrmax_expmt.csv")
 
-my_theme <- theme(axis.title = element_text(size = 12, colour = "grey30"), 
+my_theme <- theme(axis.title = element_text(size = 12), 
                   panel.background = element_blank(), 
-                  panel.border = element_rect(fill = NA, colour = "grey30"), 
+                  panel.border = element_rect(fill = NA), 
                   panel.grid = element_blank(),
                   legend.key = element_blank(), 
-                  legend.title = element_text(size = 12, face = "bold", colour = "grey30"), 
+                  legend.title = element_text(size = 12, face = "bold"), 
                   legend.position = "none",
-                  legend.text = element_text(size = 12, colour = "grey30"))
+                  legend.text = element_text(size = 12))
 
 #Mass plot
 mass <- ggplot(massdata, aes(x = Salinity, y = Growth)) +
@@ -22,7 +22,7 @@ mass <- ggplot(massdata, aes(x = Salinity, y = Growth)) +
   theme(panel.grid = element_blank()) +
   geom_hline(yintercept = 0) +
   ylim(-4, 4) +
-  xlab("Salinity (psu)") +
+  xlab("") +
   ylab("Change in Mass (g)") +
   labs(title="a") +
   stat_smooth(method = "lm", formula = y ~ x + I(x^2), size = 1, color = "forestgreen") + 
@@ -59,5 +59,6 @@ etr <- ggplot(etrdata, aes(x = Salinity, y = etrmax)) +
 #Create Multi-panel Figure
 figure <- grid.arrange(mass, etr, nrow = 2)
 
-ggsave("./figures/ulva_tolerance.png", plot = figure)
+ggsave("./figures/figure5.jpg", 
+       width = 8, height = 6, plot = figure)
 

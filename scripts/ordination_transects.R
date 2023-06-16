@@ -4,7 +4,6 @@ library(skimr)
 library(vegan)
 library(here)
 library(permute)
-library(wesanderson)
 
 theme_set(theme_classic())
 
@@ -67,7 +66,7 @@ plot(nmds_survey, type="t", main = "goodness of fit")
 points(nmds_survey, display="sites", cex=gof*100)
 
 #extract NMDS scores (x and y coordinates)
-data.scores <- as.data.frame(scores(nmds_survey))
+data.scores <- as.data.frame(scores(nmds_survey)$sites)
 
 #add columns to data frame 
 data.scores$Site <- survey_env_data$site
@@ -91,7 +90,15 @@ survey_nmds_plot <- ggplot(data = data.scores, aes(x = NMDS1, y = NMDS2)) +
 
 survey_nmds_plot
 
-ggsave(filename = "survey_nmds.png", plot = survey_nmds_plot, path = here::here("figures"), width = 16, height = 10, units = "cm")
+ggsave(filename = "survey_nmds.jpg", plot = survey_nmds_plot, 
+       path = here::here("figures"), 
+       width = 16, height = 10, 
+       units = "cm")
+
+ggsave(filename = "figure3.jpg", plot = survey_nmds_plot, 
+       path = here::here("figures"), 
+       width = 16, height = 10, 
+       units = "cm")
 
 
 # Permanova ---------------------------------------------------------------

@@ -65,7 +65,7 @@ points(nmds_exp, display ="sites", cex = gof_exp*100)
 
 
 #extract NMDS scores (x and y coordinates)
-data.scores = as.data.frame(scores(nmds_exp))
+data.scores = as.data.frame(scores(nmds_exp)$sites)
 
 #add columns to data frame 
 data.scores$Site <-  exp$site
@@ -93,7 +93,7 @@ exp_nmds_plot <- ggplot(data = data.scores, aes(x = NMDS1, y = NMDS2)) +
 
 exp_nmds_plot
 
-# ggsave(filename = "exp_nmds.png", plot = exp_nmds_plot, path = here::here("figures"), width = 16, height = 10, units = "cm")
+ggsave(filename = "figure6.jpg", plot = exp_nmds_plot, path = here::here("figures"), width = 16, height = 10, units = "cm")
 
 # Permanova ---------------------------------------------------------------
 

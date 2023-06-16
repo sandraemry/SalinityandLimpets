@@ -80,7 +80,7 @@ ggsave("./figure/RMST_28days.png", plot = b, height = 8, width = 12)
 
 surv_plot_grid <- plot_grid(KMplot, b, labels = "auto", ncol = 1, rel_heights = c(1.5,1))
 
-ggsave("./figures/survival_plots_grid.png", plot = surv_plot_grid, height = 6, width = 9)
+ggsave("./figures/figure4.jpg", plot = surv_plot_grid, height = 5.5, width = 8)
 
 
 
