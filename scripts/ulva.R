@@ -21,13 +21,13 @@ exp_data <- read_csv(here::here("data", "tidy", "field_exclusion_tidy.csv"))
 exp_data <- exp_data %>% 
   mutate(treatment = factor(treatment, levels = c("control", "exclusion")),
          region = factor(region, levels = c("Low", "High")),
-         site = factor(site, levels = c("Lions Bay 2", "Rope Site 2", "Horseshoe Bay", "Ruckle", "Eagle Cove", "Hailstorm 2"))) %>% 
-  select(region, site, treatment, fucus_pt, ulva_pt, balanus_no, chthamalus_no, masto_crust_pt, diatom_pt)
+         site = factor(site, levels = c("EC", "HS", "RP", "HB", "LB", "RS"))) %>% 
+  select(region, site, treatment, fucus_pt, ulva_spp_pt, balanus_no, chthamalus_no, masto_crust_pt, diatom_pt)
 
 
 # Fit models -----------------------------------------------------------------
 
-hist(exp_data$ulva_pt) # lots of zeros 
+hist(exp_data$ulva_spp_pt) # lots of zeros 
 
 # changing percent cover to proportion
 # transforming 0s and 1s according to Smithson M, Verkuilen J (2006). "A Better Lemon Squeezer? 
@@ -41,9 +41,9 @@ hist(exp_data$ulva_pt) # lots of zeros
 #   mutate(across(ends_with("_pt"), ~ (. * (n-1) + 0.5)/n))
 
 # fit models 
-exp_ulva_tweedie <- glmmTMB(ulva_pt ~ treatment * region +  (1|region/site), data = exp_data, family = tweedie(link = "log"))
+exp_ulva_tweedie <- glmmTMB(ulva_spp_pt ~ treatment * region +  (1|region/site), data = exp_data, family = tweedie(link = "log"))
 
-# exp_ulva_beta <- glmmTMB(ulva_pt ~ treatment * region +  (1|region/site), data = exp_data, family = beta_family(link = "logit"))
+# exp_ulva_beta <- glmmTMB(ulva_spp_pt ~ treatment * region +  (1|region/site), data = exp_data, family = beta_family(link = "logit"))
 
 #checking assumptions 
 set.seed(19)
@@ -55,7 +55,7 @@ plotResiduals(exp_ulva_sim_res, form = exp_data$treatment) #  good
 plotResiduals(exp_ulva_sim_res, form = exp_data$region) # not good
 
 #update model
-exp_ulva_tweedie_2 <- glmmTMB(ulva_pt ~ treatment * region +  (1|region/site), data = exp_data, 
+exp_ulva_tweedie_2 <- glmmTMB(ulva_spp_pt ~ treatment * region +  (1|region/site), data = exp_data, 
                          dispformula = ~region, family = tweedie(link = "log"))
 
 #checking assumptions 

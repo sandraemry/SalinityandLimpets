@@ -1,23 +1,11 @@
 ##### Survival analysis ##### 
 
 ############################### Lottia pelta  ################################## 
-pelta_data <- read_csv("./data/raw/limpet_salinity_tolerance_tidal_pelta_exp.csv") %>% 
-  clean_names()
 
-head(pelta_data)
-
-pelta_data <- pelta_data %>% 
+pelta_data <- read_csv("./data/tidy/limpet_emersion_salinity_tolerance.csv") %>% 
+  filter(species == "Lottia_pelta") %>% 
   mutate(tide_treatment = factor(tide_treatment),
-         salinity = factor(salinity, levels = c("10", "20", "30"))) %>% 
-  filter(tank != "Table", !is.na(tank)) %>% 
-  mutate(species = "Lottia_pelta") %>% 
-  mutate(status = 1) %>% 
-  rename(day = number_days_survived) %>% 
-  select(species, tide_treatment, salinity, day, tank, status)
-
-pelta_data$status[pelta_data$day > 28] <- 0
-
-pelta_data$day[pelta_data$day > 28]  <- 28
+         salinity = factor(salinity, levels = c("10", "20", "30")))
 
 # create a survival object to be fit  
 surv_object <- Surv(time = pelta_data$day, event = pelta_data$status)
@@ -69,23 +57,10 @@ b <- ggplot(data = mean_survival, aes(x = salinity, y = rmean, colour = tide_tre
 
 
 ############################### Lottia digitalis  ################################## 
-digitalis_data <- read_csv("./data/raw/limpet_salinity_tolerance_tidal_digitalis_exp.csv") %>% 
-  clean_names()
-
-head(digitalis_data)
-
-digitalis_data <- digitalis_data %>% 
+digitalis_data <- read_csv("./data/tidy/limpet_emersion_salinity_tolerance.csv") %>% 
+  filter(species == "Lottia_digitalis") %>% 
   mutate(tide_treatment = factor(tide_treatment),
-         salinity = factor(salinity, levels = c("10", "20", "30"))) %>% 
-  filter(tank != "No Tank", !is.na(tank)) %>% 
-  mutate(species = "Lottia_digitalis") %>% 
-  mutate(status = 1) %>% 
-  rename(day = number_days_survived) %>% 
-  select(species, tide_treatment, salinity, day, tank, status)
-
-digitalis_data$status[digitalis_data$day > 28] <- 0
-
-digitalis_data$day[digitalis_data$day > 28]  <- 28
+         salinity = factor(salinity, levels = c("10", "20", "30")))
 
 # create a survival object to be fit  
 surv_object <- Surv(time = digitalis_data$day, event = digitalis_data$status)

@@ -5,33 +5,21 @@ library(survminer)
 library(janitor)
 library(cowplot)
 
-raw_mort <- read_csv("./data/raw/limpet_mortality_local_adaptation.csv")
-
-raw_mort <- raw_mort %>% 
-  clean_names() %>% 
-  select(site:tank) %>% 
-  mutate(status = 1) %>% 
-  rename(day = days_survived) %>% 
-  arrange(salinity, tank, site) %>% 
+mort <- read_csv("./data/tidy/pelta_salinity_tolerance.csv") %>% 
   mutate(site = factor(site, levels = c("Low", "High"))) %>% 
-  as.data.frame() %>% 
   mutate(salinity = factor(salinity, levels = c("5", "8", "11", "14", "17", "20")))
-
-raw_mort$status[raw_mort$day == 50] <- 0
-
-raw_mort$day[raw_mort$day == 50]  <- 28
 
 
 # Kaplan-Meier curves -----------------------------------------------------
 
 # create a survival object to be fit  
-surv_object <- Surv(time = raw_mort$day, event = raw_mort$status)
+surv_object <- Surv(time = mort$day, event = mort$status)
 
 # create Kaplan-Meier survival curves 
-fit <- survfit(surv_object ~ salinity + site, data = raw_mort)
+fit <- survfit(surv_object ~ salinity + site, data = mort)
 
 
-KMplot <- ggsurvplot(fit, data = raw_mort, pval = FALSE, 
+KMplot <- ggsurvplot(fit, data = mort, pval = FALSE, 
                      facet.by = "salinity", 
                      nrow = 1, 
                      conf.int = TRUE,
