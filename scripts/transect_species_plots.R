@@ -19,11 +19,9 @@ transect <- read_csv(here::here("data", "tidy", "field_transect_tidy.csv"))
 
 #creating a unique name for each transect to be used as row names 
 transect <- transect %>% 
-  mutate(site = factor(site, levels = c("Eagle Cove", "Hailstorm 2", "Ruckle", "Horseshoe Bay", "Lions Bay 2", "Rope Site 2")),
+  mutate(site = factor(site, levels = c("EC", "HS", "RP", "HB", "LB", "RS")),
          month = factor(month, levels = c("May", "June", "July", "September")),
-         salinity_regime = factor(salinity_regime, levels = c("L", "H"))) %>% 
-  mutate(salinity_regime = recode_factor(salinity_regime, L = "Low", H = "High")) %>% 
-  rename(region = salinity_regime) %>% 
+         region = factor(region, levels = c("Low", "High"))) %>% 
   mutate(month = recode_factor(month, May = "May", June = "June", July = "July", September = "August")) %>% 
   select(site, month, region, mytilus_pt, balanus_pt, chthamalus_pt, fucus_pt, mastocarpus_crust_pt, 
          paradigitalis_no, pelta_no, barnacle_recruits_pt)

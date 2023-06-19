@@ -17,25 +17,23 @@ transect <- read_csv(here::here("data", "tidy", "field_transect_tidy.csv"))
 
 #creating a unique name for each transect to be used as row names 
 transect <- transect %>% 
-  select(-salinity_ppt) %>% 
+  select(-salinity) %>% 
   unite(col = "site_rep_month", c("site", "quadrat_no", "month"), sep = "_", remove = FALSE) %>% 
-  mutate(site = factor(site, levels = c("Eagle Cove", "Hailstorm 2", "Ruckle", "Horseshoe Bay", "Lions Bay 2", "Rope Site 2")),
+   mutate(site = factor(site, levels = c("EC", "HS", "RP", "HB", "LB", "RS")),
          month = factor(month, levels = c("May", "June", "July", "September")),
-         salinity_regime = factor(salinity_regime, levels = c("L", "H"))) %>% 
-  select(-c("barnacles_total_pt", "greens_pyropia_pt", "reds_pt", "reds_fucus_pt", "all_limpets_no", "littorina_total_no", "gastropods_no", "greens_pt"))
+         region = factor(region, levels = c("Low", "High")))
 
 # parse out only the species data, and getting rid of redundant variables  
 survey_comm_data <- transect %>% 
-  select(balanus_pt:hermit_crab_no) 
+  select(balanus_pt:ulva_spp_pt) 
 
 # recoding factors 
 survey_env_data <- transect %>%
-  select(month, site, salinity_regime) %>% 
-  mutate(salinity_regime = recode_factor(salinity_regime, L = "Low", H = "High")) %>% 
+  select(month, site, region) %>% 
   mutate(month = recode_factor(month, May = "May", June = "June", July = "July", September = "August"))
 
 mean_abundance <- transect %>% 
-  group_by(salinity_regime) %>% 
+  group_by(region) %>% 
   summarise(across(where(is.numeric), mean)) %>% 
   select(-quadrat_no)
 
@@ -49,7 +47,7 @@ perm <- how(within = Within(type = "free", mirror = TRUE),
 
 # simper analysis 
 transect_salinity_species_contributions <- simper(wisconsin(survey_comm_data), 
-                                                  group = survey_env_data$salinity_regime, 
+                                                  group = survey_env_data$region, 
                                                   permutations = perm)
 
 simper_output <- summary(transect_salinity_species_contributions)$High_Low
@@ -60,8 +58,8 @@ taxon <- rownames(simper_output)[indices]
 avg <- round(simper_output$average[indices]*100, 1)
 cumsum <- round(simper_output$cumsum[indices]*100, 1)
 
-avga <- mean_abundance %>% filter(salinity_regime == "L") %>% select(contains(taxon)) %>% t()
-avgb <- mean_abundance %>% filter(salinity_regime == "H") %>% select(contains(taxon)) %>% t()
+avga <- mean_abundance %>% filter(region == "L") %>% select(contains(taxon)) %>% t()
+avgb <- mean_abundance %>% filter(region == "H") %>% select(contains(taxon)) %>% t()
 
 df <- tibble(taxon = taxon,
                          `avg contribution (%)` = avg,

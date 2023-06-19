@@ -24,8 +24,8 @@ exp_data <- read_csv(here::here("data", "tidy", "field_exclusion_tidy.csv"))
 exp_data <- exp_data %>% 
   mutate(treatment = factor(treatment, levels = c("control", "exclusion")),
          region = factor(region, levels = c("Low", "High")),
-         site = factor(site, levels = c("Lions Bay 2", "Rope Site 2", "Horseshoe Bay", "Ruckle", "Eagle Cove", "Hailstorm 2"))) %>% 
-  select(region, site, treatment, fucus_pt, ulva_pt, balanus_no, chthamalus_no, masto_crust_pt, diatom_pt)
+         site = factor(site, levels =c("EC", "HS", "RP", "HB", "LB", "RS"))) %>% 
+  select(region, site, treatment, fucus_pt, ulva_spp_pt, balanus_no, chthamalus_no, masto_crust_pt, diatom_pt)
 
 
 # Fit models -----------------------------------------------------------------

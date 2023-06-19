@@ -9,8 +9,8 @@ library(tidyverse)
 transect <- read_csv("./data/raw/Raw_Transect_data.csv")
 
 transect <- transect %>% 
-  dplyr::rename(salinity_ppt = `Salinity (ppt)`,
-         salinity_regime = `Salinity (H/L)`,
+  dplyr::rename(salinity = `Salinity (ppt)`,
+         region = `Salinity (H/L)`,
          quadrat_no = `Quadrat #`,
          balanus_pt = `Balanus (%)`,
          chthamalus_pt = `Chthamalus (%)`,
@@ -51,20 +51,34 @@ transect <- transect %>%
          oyster_pt = `Oyster (%)`,
          hemigrapsis_no = `Hemigrapsis (#)`,
          hermit_crab_no = `Hermit Crab (#)`) %>% 
-  mutate(ulva_pt = ulva_pt + enteromorphora_or_ulva_pt)
+  mutate(ulva_spp_pt = ulva_pt + enteromorphora_or_ulva_pt)
 
 names(transect) <- tolower(names(transect))  
 
 transect <- transect %>% 
-  select(-c(`...49`, `log litt`, `log all limpets`, `log gastropods`, other, enteromorphora_or_ulva_pt))
+  select(-c(`...49`, `log litt`, `log all limpets`, `log gastropods`, 
+            other, enteromorphora_or_ulva_pt, greens_pt, greens_pyropia_pt, reds_pt, reds_fucus_pt,
+            ulva_pt, barnacles_total_pt, all_limpets_no, littorina_total_no, gastropods_no))
 
 # get rid of any species that has 0s in all quadrats, 
 # do we want to do this? They were measured but absent in all?
 transect_metadata <- transect[ ,1:5]
-transect_data <- transect[ ,6:43]
+transect_data <- transect[ ,6:35]
 transect_data <- transect_data[ , (colMeans(transect_data[ , ]) != 0)]
 transect <- cbind(transect_metadata, transect_data)
 
 rm(transect_data, transect_metadata)
+
+#change site names to codes to match other files
+transect$site <- str_replace(transect$site, "Ruckle", "RP") 
+transect$site <- str_replace(transect$site, "Eagle Cove", "EC")
+transect$site <- str_replace(transect$site, "Hailstorm 2", "HS")
+transect$site <- str_replace(transect$site, "Horseshoe Bay", "HB")
+transect$site <- str_replace(transect$site, "Lions Bay 2", "LB")
+transect$site <- str_replace(transect$site, "Rope Site 2", "RS")
+
+#change L and H to low and high, to match other data files
+transect$region <- str_replace(transect$region, "L", "Low") 
+transect$region <- str_replace(transect$region, "H", "High") 
 
 write_csv(transect, "./data/tidy/field_transect_tidy.csv")

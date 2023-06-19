@@ -19,8 +19,7 @@ exp <- exp %>%
                 region = factor(region),
                 site = factor(site)) %>% 
   unite(interaction, c(region, treatment), sep = "_", remove = F) %>% 
-  select(-c(salinity, date, time, month, replicate, greens_pyropia, reds, reds_fucus, greens, 
-                   littorina_spp_no, paradigitalis_no, unknown_limpets_no))
+  select(-c(salinity, date, time, month, replicate))
 
 exp_env_data <- exp %>% 
   select(treatment, region, site, interaction)

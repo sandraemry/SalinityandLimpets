@@ -12,9 +12,10 @@ salinity <- read_csv(here::here("data", "raw", "Salinity Data.csv")) %>%
 salinity <- salinity[!duplicated(salinity), ]
 
 salinity <- salinity %>% 
+  rename(region = salinity_group) %>% 
   mutate(date = dmy(date),
          site = factor(site),
-         salinity_group = factor(salinity_group, levels = c("L", "H")))
+         region = factor(region, levels = c("L", "H")))
 
 # calculate a 10th percentile for each site 
 salinity_summary <- salinity %>% 
@@ -30,3 +31,8 @@ sal_test <- t.test(salinity_10percentile ~ salinity_group,
                    var.equal = T)
 
 sal_test
+
+salinity$region <- str_replace(salinity$region, "L", "Low")
+salinity$region <- str_replace(salinity$region, "H", "High")
+
+write_csv(salinity, "./data/tidy/salinity_data.csv")

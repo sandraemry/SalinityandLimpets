@@ -16,19 +16,17 @@ transect <- read_csv(here::here("data", "tidy", "field_transect_tidy.csv"))
 #creating a unique name for each transect to be used as row names 
 transect <- transect %>% 
   unite(col = "site_rep_month", c("site", "quadrat_no", "month"), sep = "_", remove = FALSE) %>% 
-  mutate(site = factor(site, levels = c("Eagle Cove", "Hailstorm 2", "Ruckle", "Horseshoe Bay", "Lions Bay 2", "Rope Site 2")),
+  mutate(site = factor(site, levels = c("EC", "HS", "RP", "HB", "LB", "RS")),
          month = factor(month, levels = c("May", "June", "July", "September")),
-         salinity_regime = factor(salinity_regime, levels = c("L", "H")))
+         region = factor(region, levels = c("Low", "High")))
 
 # parse out only the species data, and getting rid of redundant variables  
 survey_comm_data <- transect %>% 
-  select(balanus_pt:hermit_crab_no) %>% 
-  select(-c("barnacles_total_pt", "greens_pyropia_pt", "reds_pt", "reds_fucus_pt", "all_limpets_no", "littorina_total_no", "gastropods_no", "greens_pt"))
+  select(balanus_pt:ulva_spp_pt) 
 
 # recoding factors 
 survey_env_data <- transect %>%
-  select(month, site, salinity_regime) %>% 
-  mutate(salinity_regime = recode_factor(salinity_regime, L = "Low", H = "High")) %>% 
+  select(month, site, region) %>% 
   mutate(month = recode_factor(month, May = "May", June = "June", July = "July", September = "August"))
 
 
@@ -71,7 +69,7 @@ data.scores <- as.data.frame(scores(nmds_survey)$sites)
 #add columns to data frame 
 data.scores$Site <- survey_env_data$site
 data.scores$Month <- survey_env_data$month
-data.scores$Salinity <- survey_env_data$salinity_regime
+data.scores$Salinity <- survey_env_data$region
 
 survey_nmds_plot <- ggplot(data = data.scores, aes(x = NMDS1, y = NMDS2)) + 
   geom_point(aes(colour = Salinity), size = 3, alpha = 0.8) + 
@@ -119,9 +117,6 @@ survey_perma
 df <- data.frame(treatments = c("salinity region", "month", "salinity region x month", "residuals", "total"), df = survey_perma$aov.tab$Df, SS = survey_perma$aov.tab$SumsOfSqs, MS = survey_perma$aov.tab$MeanSqs, `pseudo F` = survey_perma$aov.tab$F.Model, R2 = survey_perma$aov.tab$R2, `p value` = survey_perma$aov.tab$`Pr(>F)`)
 
 df[ , 3:6] <- round(df[, 3:6], 2)
-
-write_csv(df, "/Users/sandraemry/Documents/coyle_paper/results/perma_survey.csv",
-          col_names = TRUE)
 
 
 # Betadisp test -----------------------------------------------------------
