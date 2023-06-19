@@ -17,12 +17,11 @@ exp <- read_csv(here::here("data", "tidy", "field_exclusion_tidy.csv"))
 exp <- exp %>% 
   unite(col = "site_rep_treatment", c("site", "replicate", "treatment"), sep = "_", remove = FALSE) %>% 
   mutate(treatment = recode_factor(treatment, C = "Control", E = "Exclusion"), 
-         site = factor(site, levels = c("Eagle Cove", "Hailstorm 2", "Ruckle", "Horseshoe Bay", "Lions Bay 2", "Rope Site 2")),
+         site = factor(site, levels = c("EC", "HS", "RP", "HB", "LB", "RS")),
          region = factor(region, levels = c("Low", "High")))
 
 # getting rid of redundant variables 
 exp_comm_data <- exp %>% 
-  dplyr::select(-c("greens_pyropia", "reds", "reds_fucus", "greens")) %>% 
   dplyr::select(balanus_no:fucus_pt)
 
 

@@ -61,12 +61,12 @@ field_exp <- field_exp %>%
          balanus_no, chthamalus_no, digitalis_no, pelta_no, persona_no, paradigitalis_no, 
          scutum_no, unknown_limpets_no, sitkana_no, littorina_spp_no, mytilus_pt, 
          anemone_pt, amphipod_no, masto_crust_pt, mastocarpus_pt, hildenbrandia_pt, 
-         diatom_pt, ulva_pt, urospora_pt, pyropia_pt, fucus_pt)
+         diatom_pt, ulva_spp_pt, urospora_pt, pyropia_pt, fucus_pt)
   
 # get rid of any species that has 0s in all quadrats, 
 # do we want to do this? They were measured but absent in all?
-field_exp_metadata <- field_exp[ ,1:8]
-field_exp_data <- field_exp[ ,9:33]
+field_exp_metadata <- field_exp[ , 1:8]
+field_exp_data <- field_exp[ , 9:29]
 field_exp_data <- field_exp_data[ , (colMeans(field_exp_data[ , ]) != 0)]
 field_exp <- cbind(field_exp_metadata, field_exp_data)
 
