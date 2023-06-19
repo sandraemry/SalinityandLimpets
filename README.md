@@ -33,7 +33,7 @@ This repository contains all the data and code used for the following manuscript
 
 ## Field grazer manipulation experiment 
 
-- The raw data for the field experiment [Raw_Count_Data.csv](https://github.com/sandraemry/SalinityandLimpets/blob/main/data/raw/Raw_Count_Data.csv) was tidied with the following script: [field_exclusion_data_tidying.R](https://github.com/sandraemry/SalinityandLimpets/blob/main/scripts/field_exclusion_data_tidying.R), which produces the dataset [field_exclusion_tidy.csv](https://github.com/sandraemry/SalinityandLimpets/blob/main/data/tidy/field_exclusion_tidy.csv). 
+- The raw data for the field experiment [Raw_Count_Data.csv](https://github.com/sandraemry/SalinityandLimpets/blob/main/data/raw/Raw_Count_Data.csv) were tidied with the following script: [field_exclusion_data_tidying.R](https://github.com/sandraemry/SalinityandLimpets/blob/main/scripts/field_exclusion_data_tidying.R), which produces the dataset [field_exclusion_tidy.csv](https://github.com/sandraemry/SalinityandLimpets/blob/main/data/tidy/field_exclusion_tidy.csv). 
 
 - [ordination_fieldexclusions.R](https://github.com/sandraemry/SalinityandLimpets/blob/main/scripts/ordination_fieldexclusions.R) includes the code for [Fig. 6](https://github.com/sandraemry/SalinityandLimpets/blob/main/figures/exp_nmds.png), permanova analysis, and [Table S4](https://github.com/sandraemry/SalinityandLimpets/blob/main/figures/exp_betadisper.png)
 
