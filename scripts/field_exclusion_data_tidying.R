@@ -2,6 +2,7 @@
 ## Data Tidying
 
 library(tidyverse)
+library(lubridate)
 
 field_exp <- read_csv(here::here("data", "raw", "Raw_Count_Data.csv"))
 
@@ -50,21 +51,18 @@ field_exp <- field_exp %>%
          urospora_pt = urospora_pt * 100, 
          pyropia_pt = pyropia_pt * 100, 
          fucus_pt = fucus_pt * 100) %>% 
-  mutate(ulva_pt = ulva_pt + enteromorpha_pt)
-  
+  mutate(ulva_spp_pt = ulva_pt + enteromorpha_pt)
     
 names(field_exp) <- tolower(names(field_exp))
 
 field_exp <- field_exp %>% 
   fill(date, time, salinity, .direction = "down") %>% 
-  select(date, time, salinity, month, region, site, replicate, treatment, 
+  select(date, time, month, region, salinity, site, replicate, treatment, 
          balanus_no, chthamalus_no, digitalis_no, pelta_no, persona_no, paradigitalis_no, 
          scutum_no, unknown_limpets_no, sitkana_no, littorina_spp_no, mytilus_pt, 
          anemone_pt, amphipod_no, masto_crust_pt, mastocarpus_pt, hildenbrandia_pt, 
-         diatom_pt, ulva_pt, urospora_pt, pyropia_pt, fucus_pt, 
-         greens, reds, greens_pyropia, reds_fucus)
+         diatom_pt, ulva_pt, urospora_pt, pyropia_pt, fucus_pt)
   
-
 # get rid of any species that has 0s in all quadrats, 
 # do we want to do this? They were measured but absent in all?
 field_exp_metadata <- field_exp[ ,1:8]
@@ -76,6 +74,18 @@ rm(field_exp_metadata, field_exp_data)
 
 field_exp$treatment <- str_replace(field_exp$treatment, "C", "control") 
 field_exp$treatment <- str_replace(field_exp$treatment, "E", "exclusion")
+
+field_exp <- field_exp %>% 
+  mutate(date = dmy(date)) # change format to a date
+
+#change names of site codes to match other files
+
+field_exp$site <- str_replace(field_exp$site, "Ruckle", "RP") 
+field_exp$site <- str_replace(field_exp$site, "Eagle Cove", "EC")
+field_exp$site <- str_replace(field_exp$site, "Hailstorm 2", "HS")
+field_exp$site <- str_replace(field_exp$site, "Horseshoe Bay", "HB")
+field_exp$site <- str_replace(field_exp$site, "Lions Bay 2", "LB")
+field_exp$site <- str_replace(field_exp$site, "Rope Site 2", "RS") 
 
 write_csv(field_exp, "./data/tidy/field_exclusion_tidy.csv")
 
