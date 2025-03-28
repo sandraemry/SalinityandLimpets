@@ -3,6 +3,7 @@
 .Rapp.history
 # Session Data files
 .RData
+.RData 2
 # User-specific files
 .Ruserdata
 .DS_Store
