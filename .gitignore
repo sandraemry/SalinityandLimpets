@@ -5,6 +5,8 @@
 .RData
 # User-specific files
 .Ruserdata
+.DS_Store
+data/.DS_Store
 # Example code in package build process
 *-Ex.R
 # Output files from R CMD build
