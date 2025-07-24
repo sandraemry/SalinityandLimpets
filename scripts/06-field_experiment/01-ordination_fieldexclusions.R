@@ -112,7 +112,8 @@ set.seed(11)
 exp_perma_site <- adonis2(exp_comm_data ~ region * treatment, 
                            data = exp_env_data, 
                            permutations = perm_site, 
-                           method = "bray")
+                           method = "bray",
+                          by = "terms")
 
 exp_perma_site
 

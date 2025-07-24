@@ -21,12 +21,17 @@ transect <- transect %>%
   unite(col = "site_rep_month", c("site", "quadrat_no", "month"), sep = "_", remove = FALSE) %>% 
    mutate(site = factor(site, levels = c("EC", "HS", "RP", "HB", "LB", "RS")),
          month = factor(month, levels = c("May", "June", "July", "September")),
-         region = factor(region, levels = c("Low", "High")))
+         region = factor(region, levels = c("Low", "High"))) %>% 
+  mutate(mastocarpus_pt = mastocarpus_pt + mastocarpus_crust_pt,
+         littorina_spp_no = littorina_spp_no + sitkana_no,
+         limpets = pelta_no + unknown_limpet_no + paradigitalis_no + scutum_no + persona_no + digitalis_no) %>% 
+  select(-c(pelta_no, unknown_limpet_no, paradigitalis_no, scutum_no, persona_no, digitalis_no, sitkana_no, mastocarpus_crust_pt))
+
 
 # parse out only the species data, and getting rid of redundant variables  
 survey_comm_data <- transect %>% 
-  select(balanus_pt:ulva_spp_pt) 
-
+  select(balanus_pt:limpets) 
+  
 # recoding factors 
 survey_env_data <- transect %>%
   select(month, site, region) %>% 
@@ -46,20 +51,20 @@ perm <- how(within = Within(type = "free", mirror = TRUE),
 
 
 # simper analysis 
-transect_salinity_species_contributions <- simper(wisconsin(survey_comm_data), 
+transect_salinity_species_contributions <- simper(decostand(survey_comm_data^(1/4),"range"), 
                                                   group = survey_env_data$region, 
                                                   permutations = perm)
 
 simper_output <- summary(transect_salinity_species_contributions)$High_Low
 
-indices <- which(simper_output$cumsum <= 0.70)
+indices <- which(simper_output$cumsum <= 0.75)
 
 taxon <- rownames(simper_output)[indices]
 avg <- round(simper_output$average[indices]*100, 1)
 cumsum <- round(simper_output$cumsum[indices]*100, 1)
 
-avga <- mean_abundance %>% filter(region == "L") %>% select(contains(taxon)) %>% t()
-avgb <- mean_abundance %>% filter(region == "H") %>% select(contains(taxon)) %>% t()
+avga <- mean_abundance %>% filter(region == "Low") %>% select(contains(taxon)) %>% t()
+avgb <- mean_abundance %>% filter(region == "High") %>% select(contains(taxon)) %>% t()
 
 df <- tibble(taxon = taxon,
                          `avg contribution (%)` = avg,
@@ -73,11 +78,10 @@ df$taxon[df$taxon == "mytilus_pt"] <- "Mytilus trossulus (%)"
 df$taxon[df$taxon == "chthamalus_pt"] <- "Chthamalus dalli (%)"
 df$taxon[df$taxon == "balanus_pt"] <- "Balanus glandula (%)"
 df$taxon[df$taxon == "fucus_pt"] <- "Fucus distichus (%)"
-df$taxon[df$taxon == "mastocarpus_crust_pt"] <- "Petrocelis (%)"
-df$taxon[df$taxon == "paradigitalis_no"] <- "Lottia paradigitalis (no.)"
-df$taxon[df$taxon == "barnacle_recruits_pt"] <- "Barnacle recruits (%)"
-df$taxon[df$taxon == "pelta_no"] <- "Lottia pelta (no.)"
-
+df$taxon[df$taxon == "mastocarpus_pt"] <- "Mastocarpus sp. (%)"
+df$taxon[df$taxon == "ulva_spp_pt"] <- "Ulva sp. (%)"
+df$taxon[df$taxon == "littorina_spp_no"] <- "Littorina spp. (no.)"
+df$taxon[df$taxon == "limpets"] <- "limpets (no.)"
 
 df %>%   
   mutate(across("avg contribution (%)":"cumulative contribution (%)", round, 2)) %>% 

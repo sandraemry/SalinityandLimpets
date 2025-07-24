@@ -1,3 +1,8 @@
+library(tidyverse)
+library(survival)
+library(janitor)
+library(survminer)
+
 ##### Survival analysis ##### 
 
 ############################### Lottia pelta  ################################## 
@@ -31,7 +36,7 @@ lottia_pelta_fig <- ggsurvplot(pelta_fit, data = pelta_data, pval = FALSE,
 
 ######################## RMST for Lottia pelta ####################### 
 
-mean_survival <- as_tibble(survival:::survmean(fit, rmean=28)[[1]])
+mean_survival <- as_tibble(survival:::survmean(pelta_fit, rmean=28)[[1]])
 
 mean_survival <- clean_names(mean_survival)
 
@@ -84,3 +89,16 @@ lottia_digitalis_fig <- ggsurvplot(digitalis_fit, data = digitalis_data, pval = 
 final_fig <- lottia_pelta_fig + lottia_digitalis_fig + plot_layout(ncol = 1)
 
 ggsave("./figures/limpet_tidal_emersion_survival_figure.jpg", plot = final_fig, height = 6, width = 8)
+
+
+# RMST for Lottia digitalis  ----------------------------------------------
+
+mean_survival <- as_tibble(survival:::survmean(digitalis_fit, rmean=28)[[1]])
+
+mean_survival <- clean_names(mean_survival)
+
+mean_survival$salinity <- c(10,10,20,20,30,30)
+
+mean_survival$tide_treatment <- rep(c("In", "Out"), 3)
+mean_survival$tide_treatment <- factor(mean_survival$tide_treatment, levels = c("In", "Out"))
+

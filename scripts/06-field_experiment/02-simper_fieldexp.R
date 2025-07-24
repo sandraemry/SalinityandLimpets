@@ -19,10 +19,12 @@ exp <- exp %>%
                 region = factor(region),
                 site = factor(site)) %>% 
   unite(interaction, c(region, treatment), sep = "_", remove = F) %>% 
+  unite(col = "site_rep_treatment", c("site", "replicate", "treatment"), sep = "_", remove = FALSE) %>% 
+  rename(unique_rep = site_rep_treatment) %>% 
   select(-c(salinity, date, time, month, replicate))
 
 exp_env_data <- exp %>% 
-  select(treatment, region, site, interaction)
+  select(treatment, region, site, interaction, unique_rep)
 
 exp_comm_data <- exp %>%
   select(balanus_no:fucus_pt)
@@ -63,11 +65,12 @@ mean_abundance <- exp %>%
 
 # Simper analysis with all 4 groups at once -------------------------------
 
-perm <- how(within = Within(type = "free"), 
-            plots = Plots(strata = exp_env_data$site, type = "free"), 
-            blocks = NULL) 
+perm_replicate <- how(within = Within(type = "free"), 
+                      plots = Plots(strata = exp_env_data$unique_rep, type = "free"), 
+                      blocks = NULL,
+                      nperm = 999) 
 
-exp_no_grazers <- simper(wisconsin(exp_comm_data), group = exp_env_data$interaction, permutations = perm)
+exp_no_grazers <- simper(decostand(exp_comm_data^(1/4),"range"), group = exp_env_data$interaction, permutations = perm_replicate)
 
 ##################### High exclusion vs. High control ##################### 
 
@@ -81,12 +84,12 @@ cumsum <- round(he_hc$cumsum[indices]*100, 1)
 avga <- mean_abundance %>% filter(interaction == "High_exclusion") %>% select(contains(taxon)) %>% t()
 avgb <- mean_abundance %>% filter(interaction == "High_control") %>% select(contains(taxon)) %>% t()
 
-simper_table_1 <- tibble(comparison = c("high salinity - ", "", "high salinity + "),
+simper_table_1 <- tibble(comparison = c("high salinity - vs. high salinity + "),
                          taxon = taxon,
                          `avg contribution (%)` = avg,
                          `cumulative contribution (%)` = cumsum,
-                         `mean abundance group a` = avga,
-                         `mean abundance group b` = avgb
+                         `mean abundance group a` = as.vector(avga),
+                         `mean abundance group b` = as.vector(avgb)
                            )
 
 ##################### High exclusion vs. Low control ##################### 
@@ -101,7 +104,7 @@ cumsum <- round(he_lc$cumsum[indices]*100, 1)
 avga <- mean_abundance %>% filter(interaction == "High_exclusion") %>% select(contains(taxon)) %>% t()
 avgb <- mean_abundance %>% filter(interaction == "Low_control") %>% select(contains(taxon)) %>% t()
 
-simper_table_2 <- tibble(comparison = c("high salinity - ", "", "low salinity + ", ""),
+simper_table_2 <- tibble(comparison = "high salinity - vs. low salinity + ",
                          taxon = taxon, 
                          `avg contribution (%)` = avg,
                          `cumulative contribution (%)` = cumsum,
@@ -123,7 +126,7 @@ cumsum <- round(he_le$cumsum[indices] * 100, 1)
 avga <- mean_abundance %>% filter(interaction == "High_exclusion") %>% select(contains(taxon)) %>% t()
 avgb <- mean_abundance %>% filter(interaction == "Low_exclusion") %>% select(contains(taxon)) %>% t()
 
-simper_table_3 <- tibble(comparison = c("high salinity - ", "", "low salinity - "),
+simper_table_3 <- tibble(comparison = c("high salinity - vs. low salinity - "),
                          taxon = taxon, 
                          `avg contribution (%)` = avg,
                          `cumulative contribution (%)` = cumsum,
@@ -143,7 +146,7 @@ cumsum <- round(hc_lc$cumsum[indices]*100, 1)
 avga <- mean_abundance %>% filter(interaction == "High_control") %>% select(contains(taxon)) %>% t()
 avgb <- mean_abundance %>% filter(interaction == "Low_control") %>% select(contains(taxon)) %>% t()
 
-simper_table_4 <- tibble(comparison = c("high salinity + ", "", "low salinity + "),
+simper_table_4 <- tibble(comparison = c("high salinity + vs. low salinity + "),
                          taxon = taxon, 
                          `avg contribution (%)` = avg,
                          `cumulative contribution (%)` = cumsum,
@@ -163,7 +166,7 @@ cumsum <- round(hc_le$cumsum[indices]*100, 1)
 avga <- mean_abundance %>% filter(interaction == "High_control") %>% select(contains(taxon)) %>% t()
 avgb <- mean_abundance %>% filter(interaction == "Low_exclusion") %>% select(contains(taxon)) %>% t()
 
-simper_table_5 <- tibble(comparison = c("high salinity + ", "", "low salinity - "),
+simper_table_5 <- tibble(comparison = c("high salinity + vs. low salinity - "),
                          taxon = taxon, 
                          `avg contribution (%)` = avg,
                          `cumulative contribution (%)` = cumsum,
@@ -183,7 +186,7 @@ cumsum <- round(lc_le$cumsum[indices] * 100, 1)
 avga <- mean_abundance %>% filter(interaction == "Low_control") %>% select(contains(taxon)) %>% t()
 avgb <- mean_abundance %>% filter(interaction == "Low_exclusion") %>% select(contains(taxon)) %>% t()
 
-simper_table_6 <- tibble(comparison = c("low salinity + ", "", "low salinity - "),
+simper_table_6 <- tibble(comparison = c("low salinity + vs. low salinity - "),
                          taxon = taxon, 
                          `avg contribution (%)` = avg,
                          `cumulative contribution (%)` = cumsum,
@@ -196,11 +199,13 @@ simper_table_6 <- tibble(comparison = c("low salinity + ", "", "low salinity - "
 
 df <- rbind(simper_table_1, simper_table_2, simper_table_3, simper_table_4, simper_table_5, simper_table_6)
 
-df$taxon[df$taxon == "ulva_pt"] <- "Ulva sp. (%)"
+df$taxon[df$taxon == "ulva_spp_pt"] <- "Ulva sp. (%)"
 df$taxon[df$taxon == "chthamalus_no"] <- "Chthamalus dalli (no.)"
 df$taxon[df$taxon == "balanus_no"] <- "Balanus glandula (no.)"
 df$taxon[df$taxon == "fucus_pt"] <- "Fucus distichus (%)"
 df$taxon[df$taxon == "diatom_pt"] <- "Diatoms (%)"
+df$taxon[df$taxon == "masto_crust_pt"] <- "Mastocarpus sp. (%)"
+df$taxon[df$taxon == "littorina_spp_no"] <- "Littorina spp. (no.)"
 
 df %>%   
   select(-comparison) %>% 

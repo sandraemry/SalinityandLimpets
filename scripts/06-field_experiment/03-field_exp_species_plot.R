@@ -19,7 +19,7 @@ exp_data <- exp_data %>%
   mutate(treatment = factor(treatment, levels = c("control", "exclusion")),
          region = factor(region, levels = c("Low", "High")),
          site = factor(site, levels = c("LB", "RS", "HB", "RP", "EC", "HS"))) %>% 
-  select(region, site, treatment, fucus_pt, ulva_pt, balanus_no, chthamalus_no, mytilus_pt, amphipod_no, masto_crust_pt, diatom_pt, pyropia_pt)
+  select(region, site, treatment, fucus_pt, ulva_spp_pt, balanus_no, chthamalus_no, mytilus_pt, amphipod_no, masto_crust_pt, diatom_pt, pyropia_pt)
 
 cols = c("Low" = "orange", "High" = "steelblue")
 
@@ -84,10 +84,10 @@ summary_data <- exp_data %>%
   group_by(region, treatment) %>% 
   summarise(across(contains("_"), list(mean = mean, se = std_mean), .names = "{.fn}_{.col}"))
 
-c <- ggplot(data = summary_data, aes(x = treatment, y = mean_ulva_pt, colour = region)) + 
+c <- ggplot(data = summary_data, aes(x = treatment, y = mean_ulva_spp_pt, colour = region)) + 
   geom_point(position = position_dodge(0.3)) + 
   scale_colour_manual(values = cols) + 
-  geom_errorbar(aes(ymin = mean_ulva_pt - se_ulva_pt, ymax = mean_ulva_pt + se_ulva_pt), width = .1, position = position_dodge(0.3)) + 
+  geom_errorbar(aes(ymin = mean_ulva_spp_pt - se_ulva_spp_pt, ymax = mean_ulva_spp_pt + se_ulva_spp_pt), width = .1, position = position_dodge(0.3)) + 
   labs(x = "", y = expression(paste(italic("Ulva"), " sp. (% cover)")), 
        color = "Salinity region", title = "a") + 
   theme(axis.title = element_text(size = 12), 
@@ -97,7 +97,7 @@ c <- ggplot(data = summary_data, aes(x = treatment, y = mean_ulva_pt, colour = r
         legend.key = element_blank(), 
         legend.position = "right",
         legend.title = element_text(size = 12, face = "bold"), 
-        legend.text = element_text(size = 12)) 
+        legend.text = element_text(size = 12)) + 
   guides(color = guide_legend(override.aes = list(linetype = 0, size = 2)))
   
   
