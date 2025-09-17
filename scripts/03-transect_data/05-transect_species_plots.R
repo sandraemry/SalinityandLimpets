@@ -23,8 +23,11 @@ transect <- transect %>%
          month = factor(month, levels = c("May", "June", "July", "September")),
          region = factor(region, levels = c("Low", "High"))) %>% 
   mutate(month = recode_factor(month, May = "May", June = "June", July = "July", September = "August")) %>% 
-  select(site, month, region, mytilus_pt, balanus_pt, chthamalus_pt, fucus_pt, mastocarpus_crust_pt, 
-         paradigitalis_no, pelta_no, barnacle_recruits_pt)
+  mutate(mastocarpus_pt = mastocarpus_pt + mastocarpus_crust_pt,
+         littorina_spp_no = littorina_spp_no + sitkana_no,
+         limpets_no = pelta_no + unknown_limpet_no + paradigitalis_no + scutum_no + persona_no + digitalis_no) %>% 
+  select(-c(pelta_no, unknown_limpet_no, paradigitalis_no, scutum_no, persona_no, digitalis_no, sitkana_no, mastocarpus_crust_pt)) %>% 
+  select(site, month, region, chthamalus_pt, mytilus_pt, mastocarpus_pt, fucus_pt, limpets_no, littorina_spp_no, ulva_spp_pt, balanus_pt)
 
 cols = c("Low" = "orange", "High" = "steelblue")
 
@@ -34,29 +37,29 @@ summary_data <- transect %>%
   group_by(region, month) %>% 
   summarise(across(contains("_"), list(mean = mean, se = std_mean), .names = "{.fn}_{.col}"))
 
-a <- ggplot(data = summary_data, aes(x = month, y = mean_mytilus_pt, colour = region)) + 
-  geom_point(position = position_dodge(0.3)) + 
-  scale_colour_manual(values = cols) + 
-  geom_errorbar(aes(ymin = mean_mytilus_pt - se_mytilus_pt, ymax = mean_mytilus_pt + se_mytilus_pt), width = .1, position = position_dodge(0.3)) + 
-  labs(x = "", y = expression(paste(italic("M. trossulus"), " (% cover)")), title = "a") + 
-  my_theme + 
-  theme(axis.text.x = element_blank(), 
-        axis.ticks.x = element_blank())
-
-b <- ggplot(data = summary_data, aes(x = month, y = mean_balanus_pt, colour = region)) + 
-  geom_point(position = position_dodge(0.3)) + 
-  scale_colour_manual(values = cols) + 
-  geom_errorbar(aes(ymin = mean_balanus_pt - se_balanus_pt, ymax = mean_balanus_pt + se_balanus_pt), width = .1, position = position_dodge(0.3)) + 
-  labs(x = "", y = expression(paste(italic("B. glandula"), " (% cover)")), title = "b") + 
-  my_theme + 
-  theme(axis.text.x = element_blank(), 
-        axis.ticks.x = element_blank())
-
-c <- ggplot(data = summary_data, aes(x = month, y = mean_chthamalus_pt, colour = region)) + 
+a <- ggplot(data = summary_data, aes(x = month, y = mean_chthamalus_pt, colour = region)) + 
   geom_point(position = position_dodge(0.3)) + 
   scale_colour_manual(values = cols) + 
   geom_errorbar(aes(ymin = mean_chthamalus_pt - se_chthamalus_pt, ymax = mean_chthamalus_pt + se_chthamalus_pt), width = .1, position = position_dodge(0.3)) + 
-  labs(x = "", y = expression(paste(italic("C. dalli"), " (% cover)")), title = "c") + 
+  labs(x = "", y = expression(paste(italic("C. dalli"), " (% cover)")), title = "a") + 
+  my_theme + 
+  theme(axis.text.x = element_blank(), 
+        axis.ticks.x = element_blank())
+
+b <- ggplot(data = summary_data, aes(x = month, y = mean_mytilus_pt, colour = region)) + 
+  geom_point(position = position_dodge(0.3)) + 
+  scale_colour_manual(values = cols) + 
+  geom_errorbar(aes(ymin = mean_mytilus_pt - se_mytilus_pt, ymax = mean_mytilus_pt + se_mytilus_pt), width = .1, position = position_dodge(0.3)) + 
+  labs(x = "", y = expression(paste(italic("M. trossulus"), " (% cover)")), title = "b") + 
+  my_theme + 
+  theme(axis.text.x = element_blank(), 
+        axis.ticks.x = element_blank())
+
+c <- ggplot(data = summary_data, aes(x = month, y = mean_mastocarpus_pt, colour = region)) + 
+  geom_point(position = position_dodge(0.3)) + 
+  scale_colour_manual(values = cols) + 
+  geom_errorbar(aes(ymin = mean_mastocarpus_pt - se_mastocarpus_pt, ymax = mean_mastocarpus_pt + se_mastocarpus_pt), width = .1, position = position_dodge(0.3)) + 
+  labs(x = "", y = expression(paste(italic("Mastocarpus"), " sp. (% cover)")), title = "c") + 
   my_theme + 
   theme(axis.text.x = element_blank(), 
         axis.ticks.x = element_blank())
@@ -70,32 +73,34 @@ d <- ggplot(data = summary_data, aes(x = month, y = mean_fucus_pt, colour = regi
   theme(axis.text.x = element_blank(), 
         axis.ticks.x = element_blank())
 
-e <- ggplot(data = summary_data, aes(x = month, y = mean_mastocarpus_crust_pt, colour = region)) + 
+
+e <- ggplot(data = summary_data, aes(x = month, y = mean_limpets_no, colour = region)) + 
   geom_point(position = position_dodge(0.3)) + 
   scale_colour_manual(values = cols) + 
-  geom_errorbar(aes(ymin = mean_mastocarpus_crust_pt - se_mastocarpus_crust_pt, ymax = mean_mastocarpus_crust_pt + se_mastocarpus_crust_pt), width = .1, position = position_dodge(0.3)) + 
-  labs(x = "", y = expression(paste(italic("Petrocelis"), " (% cover)")), title = "e") + 
+  geom_errorbar(aes(ymin = mean_limpets_no - se_limpets_no, ymax = mean_limpets_no + se_limpets_no), width = .1, position = position_dodge(0.3)) + 
+  labs(x = "", y = expression(paste(italic(" Limpets"), " (no.)")), title = "e") + 
   my_theme 
 
-f <- ggplot(data = summary_data, aes(x = month, y = mean_paradigitalis_no, colour = region)) + 
+f <- ggplot(data = summary_data, aes(x = month, y = mean_littorina_spp_no, colour = region)) + 
   geom_point(position = position_dodge(0.3)) + 
   scale_colour_manual(values = cols) + 
-  geom_errorbar(aes(ymin = mean_paradigitalis_no - se_paradigitalis_no, ymax = mean_paradigitalis_no + se_paradigitalis_no), width = .1, position = position_dodge(0.3)) + 
-  labs(x = "", y = expression(paste(italic(" L. paradigitalis"), " (no.)")), title = "f") + 
+  geom_errorbar(aes(ymin = mean_littorina_spp_no - se_littorina_spp_no, ymax = mean_littorina_spp_no + se_littorina_spp_no), width = .1, position = position_dodge(0.3)) + 
+  labs(x = "", y = expression(paste(italic("Littorina"), " spp. no.")), title = "f") + 
   my_theme 
 
-g <- ggplot(data = summary_data, aes(x = month, y = mean_pelta_no, colour = region)) + 
+g <- ggplot(data = summary_data, aes(x = month, y = mean_ulva_spp_pt, colour = region)) + 
   geom_point(position = position_dodge(0.3)) + 
   scale_colour_manual(values = cols) + 
-  geom_errorbar(aes(ymin = mean_pelta_no - se_pelta_no, ymax = mean_pelta_no + se_pelta_no), width = .1, position = position_dodge(0.3)) + 
-  labs(x = "", y = expression(paste(italic("L. pelta"), " (no.)")), title = "g") + 
+  geom_errorbar(aes(ymin = mean_ulva_spp_pt - se_ulva_spp_pt, ymax = mean_ulva_spp_pt + se_ulva_spp_pt), width = .1, position = position_dodge(0.3)) + 
+  labs(x = "", y = expression(paste(italic("Ulva"), " sp. (no.)")), fill = "salinity region", title = "g") + 
   my_theme 
 
-h <- ggplot(data = summary_data, aes(x = month, y = mean_barnacle_recruits_pt, colour = region)) + 
+
+h <- ggplot(data = summary_data, aes(x = month, y = mean_balanus_pt, colour = region)) + 
   geom_point(position = position_dodge(0.3)) + 
   scale_colour_manual(values = cols) + 
-  geom_errorbar(aes(ymin = mean_barnacle_recruits_pt - se_barnacle_recruits_pt, ymax = mean_barnacle_recruits_pt + se_barnacle_recruits_pt), width = .1, position = position_dodge(0.3)) + 
-  labs(x = "", y = "Barnacle recruits (% cover)", fill = "salinity region", title = "h") + 
+  geom_errorbar(aes(ymin = mean_balanus_pt - se_balanus_pt, ymax = mean_balanus_pt + se_balanus_pt), width = .1, position = position_dodge(0.3)) + 
+  labs(x = "", y = expression(paste(italic("B. glandula"), " (% cover)")), title = "h") + 
   my_theme 
 
 i <- ggplot(data.frame(l = "month", x = 5, y = 5)) +

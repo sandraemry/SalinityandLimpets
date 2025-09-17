@@ -57,7 +57,7 @@ df2 <- df |>
 b <- ggplot(data = df2, aes(x = month, y = log(total_limpets + 1), color = site)) + 
   geom_boxplot() + 
   scale_colour_manual(values = c("orange", "orange", "orange", "steelblue", "steelblue", "steelblue"))  + 
-  labs(x = "Month", y = "Log of Limpets (no. + 1)") + 
+  labs(x = "Month", y = "Ln of Limpets (no. + 1)") + 
   theme(legend.position="none")
 
 
